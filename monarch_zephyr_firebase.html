@@ -1,0 +1,3529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#000000"/>
+<title>Monarch Zephyr V5 | Hunter: Sam</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;800;900&family=Share+Tech+Mono&display=swap');
+
+:root{
+  --v1:#0a0010;--v2:#12001f;--v3:#1a0030;
+  --acc:#8b00ff;--acc2:#b044ff;--acc3:#5500cc;
+  --grn:#00ff88;--red:#ff003c;--gold:#fbbf24;
+  --sat:env(safe-area-inset-top,0px);
+  --sab:env(safe-area-inset-bottom,0px);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{font-size:16px;-webkit-text-size-adjust:100%;}
+body{
+  width:100%;height:100dvh;overflow:hidden;
+  background:var(--v1);
+  font-family:'Jost',sans-serif;color:#e8e0f0;
+  padding-top:var(--sat);
+}
+input,textarea,select{font-size:16px!important;font-family:'Jost',sans-serif;}
+
+/* ── BG CANVAS ── */
+#bgc{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* ── CINEMATIC ── */
+#cin{position:fixed;inset:0;z-index:9500;display:none;pointer-events:none;}
+#cin.show{display:block;}
+
+/* ══════════════════════════════════════
+   BOOT SCREEN — Symbiote awakening
+══════════════════════════════════════ */
+#boot{
+  position:fixed;inset:0;z-index:9999;
+  background:radial-gradient(ellipse at 50% 40%, #1a0030 0%, #000 70%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;padding:32px;
+}
+.b-logo{
+  font-size:clamp(28px,8vw,52px);font-weight:900;letter-spacing:4px;
+  text-align:center;margin-bottom:4px;
+  /* Venom symbiote drip text effect */
+  background:linear-gradient(180deg, #ffffff 0%, #cc88ff 40%, #8b00ff 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 20px rgba(139,0,255,.6));
+}
+.b-sub{
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  color:rgba(176,68,255,.5);letter-spacing:6px;margin-bottom:16px;
+  text-transform:uppercase;
+}
+.bl{
+  font-family:'Share Tech Mono',monospace;color:rgba(176,68,255,.8);
+  font-size:clamp(11px,3vw,14px);opacity:0;transform:translateX(-16px);
+  display:flex;align-items:center;gap:8px;width:100%;max-width:320px;
+  transition:opacity .4s, transform .4s;
+}
+.bl.vis{opacity:1;transform:translateX(0);}
+.bl::before{content:'//';color:#8b00ff;font-size:10px;flex-shrink:0;letter-spacing:-2px;}
+.bbar-w{
+  width:100%;max-width:260px;height:3px;margin-top:16px;
+  background:rgba(139,0,255,.08);
+  clip-path:polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+}
+.bbar{height:100%;width:0%;background:linear-gradient(90deg,#5500cc,#b044ff,#8b00ff);transition:width 3s cubic-bezier(.25,.1,.25,1);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.cur{display:inline-block;width:6px;height:11px;background:#8b00ff;animation:blink .55s infinite;vertical-align:middle;margin-left:3px;}
+
+/* ══════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════ */
+#app{position:fixed;inset:0;z-index:10;display:none;flex-direction:column;padding-top:var(--sat);}
+
+/* ══════════════════════════════════════
+   HEADER — Cracked obsidian slab
+══════════════════════════════════════ */
+#hdr{
+  background:linear-gradient(180deg, rgba(18,0,31,.98) 0%, rgba(10,0,16,.98) 100%);
+  border-bottom:2px solid transparent;
+  border-image:linear-gradient(90deg, transparent, #8b00ff 30%, #b044ff 50%, #8b00ff 70%, transparent) 1;
+  padding:10px 14px 9px;flex-shrink:0;
+  position:relative;
+}
+#hdr::after{
+  content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(139,0,255,.15),transparent);
+}
+.hdr-title{
+  font-size:clamp(13px,3.8vw,18px);font-weight:900;letter-spacing:2px;
+  text-transform:uppercase;
+  color:#fff;
+  text-shadow:0 0 20px rgba(139,0,255,.8), 0 0 40px rgba(139,0,255,.3);
+  margin-bottom:5px;
+}
+.hdr-date{font-size:9px;color:rgba(176,68,255,.4);font-family:'Share Tech Mono',monospace;margin-bottom:7px;letter-spacing:1.5px;}
+.hdr-hp-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.hp-lbl{font-size:9px;font-weight:900;color:#b044ff;font-family:'Share Tech Mono',monospace;white-space:nowrap;flex-shrink:0;letter-spacing:.5px;}
+.hp-bar{
+  flex:1;height:6px;
+  background:rgba(139,0,255,.08);
+  clip-path:polygon(3px 0%,100% 0%,calc(100% - 3px) 100%,0% 100%);
+}
+.hp-fill{
+  height:100%;
+  background:linear-gradient(90deg,#5500cc,#8b00ff,#00ff88);
+  transition:width .5s ease;
+  box-shadow:0 0 8px rgba(139,0,255,.6);
+}
+.lvl-pill{
+  font-size:9px;font-weight:900;color:#fff;
+  background:linear-gradient(135deg,#3d0080,#8b00ff);
+  padding:3px 10px;border-radius:2px;
+  font-family:'Share Tech Mono',monospace;white-space:nowrap;flex-shrink:0;
+  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+  letter-spacing:.5px;
+}
+.hdr-quote{
+  font-size:9px;color:rgba(176,68,255,.45);font-style:italic;
+  line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden;letter-spacing:.3px;
+}
+
+/* ══════════════════════════════════════
+   TABS — Corrupted nav
+══════════════════════════════════════ */
+#tabbar{
+  display:flex;
+  background:rgba(8,0,14,.95);
+  border-bottom:1px solid rgba(139,0,255,.12);
+  overflow-x:auto;flex-shrink:0;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+}
+#tabbar::-webkit-scrollbar{display:none;}
+.tb{
+  padding:10px 14px;font-size:9px;font-weight:900;
+  color:rgba(255,255,255,.25);background:transparent;border:none;cursor:pointer;
+  white-space:nowrap;letter-spacing:1px;text-transform:uppercase;
+  border-bottom:2px solid transparent;transition:all .18s;
+  font-family:'Jost',sans-serif;flex-shrink:0;min-height:42px;touch-action:manipulation;
+  position:relative;
+}
+.tb.act{
+  color:#cc88ff;
+  border-bottom-color:#8b00ff;
+  background:linear-gradient(180deg,rgba(139,0,255,.07) 0%,transparent 100%);
+  text-shadow:0 0 10px rgba(176,68,255,.6);
+}
+
+/* ══════════════════════════════════════
+   CONTENT
+══════════════════════════════════════ */
+#content{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:12px 11px calc(20px + var(--sab));
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;scrollbar-color:rgba(139,0,255,.2) transparent;
+}
+#content::-webkit-scrollbar{width:2px;}
+#content::-webkit-scrollbar-thumb{background:rgba(139,0,255,.3);}
+.panel{display:none;animation:fadeUp .24s ease;}
+.panel.act{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════════════════════════════════════
+   CARDS — Symbiote shard panels
+══════════════════════════════════════ */
+.gc{
+  background:linear-gradient(135deg,rgba(20,0,35,.9) 0%,rgba(12,0,22,.9) 100%);
+  border:1px solid rgba(139,0,255,.18);
+  border-radius:4px;
+  padding:15px;width:100%;margin-bottom:11px;
+  position:relative;overflow:hidden;
+  /* Jagged top-right corner clip */
+  clip-path:polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+.gc::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(139,0,255,.35),rgba(176,68,255,.5),rgba(139,0,255,.35),transparent);
+}
+.gc::after{
+  content:'';position:absolute;
+  top:0;right:0;width:12px;height:12px;
+  background:linear-gradient(225deg,#8b00ff 0%,rgba(139,0,255,.3) 60%,transparent 100%);
+}
+/* Card variants */
+.gc-g{border-color:rgba(0,255,136,.2);background:linear-gradient(135deg,rgba(0,30,15,.9),rgba(0,18,10,.9));}
+.gc-g::before{background:linear-gradient(90deg,transparent,rgba(0,255,136,.3),transparent);}
+.gc-g::after{background:linear-gradient(225deg,rgba(0,255,136,.5) 0%,transparent 100%);}
+.gc-r{border-color:rgba(255,0,60,.22);background:linear-gradient(135deg,rgba(30,0,10,.9),rgba(20,0,8,.9));}
+.gc-r::before{background:linear-gradient(90deg,transparent,rgba(255,0,60,.3),transparent);}
+.gc-r::after{background:linear-gradient(225deg,rgba(255,0,60,.5) 0%,transparent 100%);}
+.gc-gold{border-color:rgba(251,191,36,.2);background:linear-gradient(135deg,rgba(25,15,0,.9),rgba(15,10,0,.9));}
+.gc-gold::before{background:linear-gradient(90deg,transparent,rgba(251,191,36,.3),transparent);}
+.gc-gold::after{background:linear-gradient(225deg,rgba(251,191,36,.5) 0%,transparent 100%);}
+.gc-p{border-color:rgba(139,0,255,.3);background:linear-gradient(135deg,rgba(20,0,40,.9),rgba(12,0,25,.9));}
+.gc-p::before{background:linear-gradient(90deg,transparent,rgba(176,68,255,.4),transparent);}
+.gc-c{border-color:rgba(139,0,255,.25);}
+
+/* ══════════════════════════════════════
+   BUTTONS — Corruption shards
+══════════════════════════════════════ */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;padding:13px 16px;border:none;
+  border-radius:3px;cursor:pointer;
+  font-family:'Jost',sans-serif;font-weight:900;font-size:13px;
+  text-transform:uppercase;letter-spacing:1px;
+  transition:filter .1s,transform .08s;
+  position:relative;overflow:hidden;min-height:48px;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+}
+.btn::before{
+  content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);
+  transition:left .4s;
+}
+.btn:active::before{left:100%;}
+.btn:active{filter:brightness(.75);transform:scale(.98);}
+.btn-sm{padding:9px 14px;font-size:11px;min-height:38px;width:auto;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);}
+
+.b-blue{background:linear-gradient(135deg,#2200aa,#6600ee,#8b00ff);color:#fff;box-shadow:0 4px 20px rgba(139,0,255,.3);}
+.b-green{background:linear-gradient(135deg,#003322,#006644,#00ff88);color:#000;box-shadow:0 4px 15px rgba(0,255,136,.2);}
+.b-red{background:linear-gradient(135deg,#550011,#aa0022,#ff003c);color:#fff;box-shadow:0 4px 15px rgba(255,0,60,.25);}
+.b-gold{background:linear-gradient(135deg,#4a2000,#996600,#fbbf24);color:#000;box-shadow:0 4px 15px rgba(251,191,36,.2);}
+.b-purple{background:linear-gradient(135deg,#2a0060,#6600cc,#8b00ff);color:#fff;box-shadow:0 4px 20px rgba(139,0,255,.35);}
+.b-cyan{background:linear-gradient(135deg,#1a0040,#5500aa,#b044ff);color:#fff;box-shadow:0 4px 20px rgba(176,68,255,.3);}
+
+/* Ripple */
+.rpl-dot{position:absolute;border-radius:50%;transform:scale(0);animation:rplAnim .5s linear;pointer-events:none;background:rgba(255,255,255,.25);}
+@keyframes rplAnim{to{transform:scale(4);opacity:0;}}
+
+/* ══════════════════════════════════════
+   INPUTS — Void terminals
+══════════════════════════════════════ */
+.inp{
+  width:100%;padding:12px 14px;
+  background:rgba(139,0,255,.04);
+  border:1px solid rgba(139,0,255,.18);
+  border-left:3px solid rgba(139,0,255,.4);
+  border-radius:2px;color:#e8e0f0;
+  font-family:'Jost',sans-serif;font-size:16px;outline:none;
+  transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;
+}
+.inp:focus{
+  border-color:rgba(176,68,255,.6);
+  border-left-color:#b044ff;
+  box-shadow:0 0 0 2px rgba(139,0,255,.12), -4px 0 12px rgba(139,0,255,.2);
+}
+.inp::placeholder{color:rgba(255,255,255,.18);}
+textarea.inp{resize:vertical;min-height:90px;}
+
+/* ══════════════════════════════════════
+   SECTION TITLES
+══════════════════════════════════════ */
+.st{
+  font-size:10px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;
+  margin-bottom:13px;display:flex;align-items:center;gap:7px;
+}
+.st::before{content:'';display:inline-block;width:16px;height:2px;border-radius:1px;flex-shrink:0;}
+.cc{color:#b044ff;}.cc::before{background:#8b00ff;}
+.cg{color:#00ff88;}.cg::before{background:#00ff88;}
+.cr{color:var(--red);}.cr::before{background:var(--red);}
+.cgold{color:var(--gold);}.cgold::before{background:var(--gold);}
+.cp{color:#cc88ff;}.cp::before{background:#8b00ff;}
+
+/* ══════════════════════════════════════
+   STAT GRID — 2 col
+══════════════════════════════════════ */
+.s2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px;}
+.sc{
+  background:linear-gradient(135deg,rgba(18,0,30,.9),rgba(10,0,20,.9));
+  border:1px solid rgba(139,0,255,.15);
+  border-radius:3px;padding:14px 8px;text-align:center;
+  position:relative;overflow:hidden;
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+}
+.sc::before{content:'';position:absolute;top:0;right:0;width:8px;height:8px;background:rgba(139,0,255,.3);}
+.sv{font-size:clamp(20px,5vw,28px);font-weight:900;font-family:'Share Tech Mono',monospace;text-shadow:0 0 15px currentColor;}
+.sl{font-size:8px;color:rgba(255,255,255,.28);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;font-weight:900;}
+
+/* ══════════════════════════════════════
+   TASKS
+══════════════════════════════════════ */
+.ti{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:12px 11px;
+  background:rgba(139,0,255,.04);
+  border:1px solid rgba(139,0,255,.1);
+  border-left:3px solid rgba(139,0,255,.4);
+  border-radius:2px;margin-bottom:7px;
+  animation:slideIn .2s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.ti.done{opacity:.35;}
+.ti.done .titxt{text-decoration:line-through;}
+.ticb{width:18px;height:18px;accent-color:#8b00ff;flex-shrink:0;margin-top:2px;cursor:pointer;}
+.titxt{flex:1;font-size:12px;font-weight:800;color:rgba(255,255,255,.82);text-transform:capitalize;line-height:1.4;word-break:break-word;}
+.tidel{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;opacity:.35;padding:2px 4px;flex-shrink:0;min-width:28px;min-height:28px;}
+.tidel:active{opacity:1;}
+
+/* ══════════════════════════════════════
+   REWARD CARD
+══════════════════════════════════════ */
+.rcard{
+  background:linear-gradient(135deg,rgba(0,25,13,.9),rgba(0,15,8,.9));
+  border:1px solid rgba(0,255,136,.18);
+  border-left:3px solid rgba(0,255,136,.5);
+  border-radius:3px;padding:13px;margin-bottom:9px;
+  animation:slideIn .2s ease;
+}
+.rcard.locked{opacity:.38;pointer-events:none;}
+.rcard-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:11px;}
+.rcard-ico{font-size:26px;flex-shrink:0;line-height:1;}
+.rcard-info{flex:1;}
+.rcard-name{font-size:13px;font-weight:900;color:#00ff88;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.rcard-desc{font-size:10px;font-weight:800;color:rgba(255,255,255,.38);line-height:1.5;text-transform:capitalize;}
+.rbadge{display:inline-block;font-size:8px;font-weight:900;padding:2px 7px;border-radius:1px;background:rgba(0,255,136,.1);color:#00ff88;border:1px solid rgba(0,255,136,.2);letter-spacing:.8px;margin-top:4px;margin-right:4px;text-transform:uppercase;}
+.rbadge-lock{background:rgba(251,191,36,.08);color:var(--gold);border-color:rgba(251,191,36,.2);}
+
+/* ══════════════════════════════════════
+   PENALTY CARD
+══════════════════════════════════════ */
+.pcard{
+  background:linear-gradient(135deg,rgba(25,0,8,.9),rgba(15,0,5,.9));
+  border:1px solid rgba(255,0,60,.2);
+  border-left:3px solid rgba(255,0,60,.55);
+  border-radius:3px;padding:13px;margin-bottom:9px;
+  animation:slideIn .2s ease;
+}
+.pcard-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:11px;}
+.pcard-ico{font-size:26px;flex-shrink:0;line-height:1;}
+.pcard-info{flex:1;}
+.pcard-name{font-size:13px;font-weight:900;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.pcard-desc{font-size:10px;font-weight:800;color:rgba(255,255,255,.38);line-height:1.5;text-transform:capitalize;}
+.pbadge{display:inline-block;font-size:8px;font-weight:900;padding:2px 7px;border-radius:1px;background:rgba(255,0,60,.1);color:var(--red);border:1px solid rgba(255,0,60,.2);letter-spacing:.8px;margin-top:4px;text-transform:uppercase;}
+
+/* ══════════════════════════════════════
+   EXERCISE CARD
+══════════════════════════════════════ */
+.excard{
+  background:rgba(139,0,255,.04);border:1px solid rgba(139,0,255,.12);
+  border-left:2px solid rgba(139,0,255,.4);
+  border-radius:2px;padding:11px;margin-bottom:7px;
+}
+.exname{font-size:12px;font-weight:900;color:#cc88ff;text-transform:uppercase;letter-spacing:.5px;}
+.exsets{font-size:10px;font-weight:800;color:rgba(255,255,255,.32);margin-top:3px;font-family:'Share Tech Mono',monospace;}
+
+/* ══════════════════════════════════════
+   MEAL CARD
+══════════════════════════════════════ */
+.mcard{
+  display:flex;align-items:flex-start;gap:10px;
+  background:rgba(0,255,136,.03);
+  border:1px solid rgba(0,255,136,.1);
+  border-radius:3px;padding:11px;margin-bottom:7px;
+}
+.mcard.mdone{opacity:.38;}
+.mico{font-size:22px;flex-shrink:0;line-height:1;margin-top:1px;}
+.minfo{flex:1;}
+.mname{font-size:12px;font-weight:900;color:rgba(255,255,255,.88);text-transform:uppercase;letter-spacing:.3px;}
+.mdet{font-size:9px;font-weight:800;color:rgba(255,255,255,.32);margin-top:2px;line-height:1.4;}
+.mcb{width:18px;height:18px;accent-color:#00ff88;flex-shrink:0;margin-top:2px;cursor:pointer;}
+
+/* ══════════════════════════════════════
+   GLOW / ASCEND ITEM
+══════════════════════════════════════ */
+.gli{
+  display:flex;align-items:flex-start;gap:10px;padding:10px 11px;
+  background:rgba(139,0,255,.03);
+  border:1px solid rgba(139,0,255,.08);
+  border-radius:2px;margin-bottom:6px;
+}
+.gli.gldone{opacity:.3;}
+.glcb{width:16px;height:16px;accent-color:#8b00ff;flex-shrink:0;margin-top:2px;cursor:pointer;}
+.gltxt{font-size:11px;font-weight:800;color:rgba(255,255,255,.78);text-transform:capitalize;line-height:1.4;}
+
+/* ══════════════════════════════════════
+   SKIN STEP
+══════════════════════════════════════ */
+.sstep{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.sstep:last-child{border:none;}
+.snum{
+  width:20px;height:20px;border-radius:2px;background:#8b00ff;color:#fff;
+  font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+  clip-path:polygon(3px 0%,100% 0%,calc(100% - 3px) 100%,0% 100%);
+}
+.stxt{font-size:11px;font-weight:800;color:rgba(255,255,255,.65);text-transform:capitalize;line-height:1.5;}
+
+/* ══════════════════════════════════════
+   PROTOCOL DAY
+══════════════════════════════════════ */
+.pday{
+  display:flex;align-items:flex-start;gap:10px;padding:11px;
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:3px;margin-bottom:7px;background:rgba(255,255,255,.015);
+}
+.pday.pul{border-color:rgba(251,191,36,.25);background:rgba(251,191,36,.03);}
+.pday.pdn{border-color:rgba(0,255,136,.2);background:rgba(0,255,136,.03);}
+.pdnum{width:28px;height:28px;border-radius:2px;flex-shrink:0;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:rgba(255,255,255,.18);}
+.pdnum.ul{background:rgba(251,191,36,.1);color:var(--gold);}
+.pdnum.dn{background:rgba(0,255,136,.1);color:#00ff88;}
+.pdtxt{flex:1;font-size:11px;font-weight:800;color:rgba(255,255,255,.18);text-transform:capitalize;line-height:1.5;padding-top:3px;}
+
+/* ══════════════════════════════════════
+   DUNGEON CARD
+══════════════════════════════════════ */
+.dcard{
+  background:linear-gradient(135deg,rgba(20,0,40,.9),rgba(12,0,25,.9));
+  border:1px solid rgba(139,0,255,.25);
+  border-top:2px solid rgba(139,0,255,.5);
+  border-radius:3px;padding:13px;margin-bottom:9px;
+  animation:slideIn .2s ease;
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+  position:relative;
+}
+.dcard::before{content:'';position:absolute;top:0;right:0;width:14px;height:14px;background:rgba(139,0,255,.4);}
+.dname{font-size:13px;font-weight:900;color:#cc88ff;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+.dtimer{font-size:clamp(22px,6vw,30px);font-weight:900;font-family:'Share Tech Mono',monospace;color:var(--gold);margin-bottom:10px;text-shadow:0 0 12px rgba(251,191,36,.4);}
+.dtimer.exp{color:var(--red);text-shadow:0 0 12px rgba(255,0,60,.4);}
+
+/* ══════════════════════════════════════
+   LEDGER
+══════════════════════════════════════ */
+.lrow{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(139,0,255,.07);}
+.ltag{flex:1;font-size:11px;font-weight:800;color:rgba(255,255,255,.55);text-transform:capitalize;line-height:1.4;}
+.ldate{font-size:8px;color:rgba(255,255,255,.18);flex-shrink:0;font-family:'Share Tech Mono',monospace;}
+.lamp{font-size:12px;font-weight:900;font-family:'Share Tech Mono',monospace;flex-shrink:0;}
+.l-plus{color:#00ff88;}
+.l-minus{color:var(--red);}
+
+/* ══════════════════════════════════════
+   CONFIDENCE QUEST DAYS
+══════════════════════════════════════ */
+.cqd{
+  display:flex;align-items:flex-start;gap:9px;padding:9px 11px;
+  border:1px solid rgba(139,0,255,.08);border-radius:2px;margin-bottom:6px;
+  background:rgba(139,0,255,.02);
+}
+.cqd.cqa{border-color:rgba(139,0,255,.3);background:rgba(139,0,255,.06);}
+.cqd.cqdn{border-color:rgba(0,255,136,.22);background:rgba(0,255,136,.03);}
+.cqnum{width:20px;height:20px;border-radius:2px;font-size:8px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.cqtxt{flex:1;font-size:10px;font-weight:800;text-transform:capitalize;line-height:1.5;}
+
+/* ══════════════════════════════════════
+   WEIGHT BAR
+══════════════════════════════════════ */
+.wbar{height:6px;background:rgba(139,0,255,.08);border-radius:1px;overflow:hidden;margin:5px 0;}
+.wfill{height:100%;background:linear-gradient(90deg,#5500cc,#b044ff);border-radius:1px;transition:width .6s ease;box-shadow:0 0 8px rgba(139,0,255,.4);}
+
+/* ══════════════════════════════════════
+   CHART WRAP
+══════════════════════════════════════ */
+.cwrap{
+  background:rgba(139,0,255,.03);border:1px solid rgba(139,0,255,.1);
+  border-radius:3px;padding:11px;position:relative;height:180px;
+}
+
+/* ══════════════════════════════════════
+   QUOTE CARD
+══════════════════════════════════════ */
+.qcard{
+  background:linear-gradient(135deg,rgba(20,0,35,.85),rgba(12,0,22,.85));
+  border:1px solid rgba(139,0,255,.2);
+  border-top:2px solid rgba(139,0,255,.4);
+  border-radius:3px;padding:14px 15px 12px;margin-bottom:11px;
+  text-align:center;position:relative;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+}
+.qcard::after{content:'';position:absolute;top:0;right:0;width:10px;height:10px;background:rgba(139,0,255,.4);}
+.qtxt{font-size:11px;font-weight:800;color:rgba(255,255,255,.7);font-style:italic;line-height:1.65;}
+.qsrc{font-size:9px;font-weight:900;color:#8b00ff;opacity:.7;margin-top:6px;font-style:normal;letter-spacing:1.5px;text-transform:uppercase;}
+
+/* ══════════════════════════════════════
+   LABEL
+══════════════════════════════════════ */
+.lbl{font-size:10px;font-weight:900;color:rgba(255,255,255,.3);text-transform:uppercase;margin-bottom:6px;letter-spacing:1px;}
+
+/* ══════════════════════════════════════
+   BANNERS
+══════════════════════════════════════ */
+.banner{display:none;align-items:center;gap:10px;padding:11px 13px;border-radius:2px;margin-bottom:11px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;border:1px solid;animation:slideIn .3s ease;border-left-width:3px;}
+.banner.show{display:flex;}
+.bn-gold{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.25);border-left-color:var(--gold);color:var(--gold);}
+.bn-p{background:rgba(139,0,255,.06);border-color:rgba(139,0,255,.2);border-left-color:#8b00ff;color:#cc88ff;}
+
+/* ── TOP PENALTY BANNERS ── */
+.top-ban{position:fixed;top:0;left:0;right:0;z-index:6800;padding:calc(10px + var(--sat)) 14px 10px;font-size:11px;font-weight:900;color:#fff;text-align:center;text-transform:uppercase;letter-spacing:1px;display:none;backdrop-filter:blur(8px);}
+.top-ban.show{display:block;}
+#ban-nomobile{background:rgba(255,0,60,.9);}
+#ban-nosocial{background:rgba(100,0,200,.9);}
+
+/* ── SCREEN TIMER ── */
+#scr-timer{position:fixed;bottom:calc(14px + var(--sab));right:12px;z-index:6500;background:rgba(8,0,16,.95);border:1px solid rgba(139,0,255,.3);border-radius:3px;padding:7px 12px;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:900;color:#b044ff;display:none;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);}
+#scr-timer.show{display:block;}
+
+/* ══════════════════════════════════════
+   MODAL
+══════════════════════════════════════ */
+#modal-ov{position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:16px;padding-bottom:calc(16px + var(--sab));}
+#modal-ov.show{display:flex;}
+.mbox{
+  background:linear-gradient(180deg,rgba(16,0,28,.99) 0%,rgba(8,0,16,.99) 100%);
+  border:1px solid rgba(139,0,255,.3);
+  border-top:2px solid rgba(176,68,255,.6);
+  border-radius:4px;
+  padding:24px 18px;width:100%;max-width:400px;text-align:center;
+  box-shadow:0 0 60px rgba(139,0,255,.2), 0 20px 60px rgba(0,0,0,.6);
+  animation:popIn .22s cubic-bezier(.34,1.56,.64,1);
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+}
+.mbox::before{content:'';position:absolute;top:0;right:0;width:14px;height:14px;background:rgba(139,0,255,.5);}
+@keyframes popIn{from{transform:scale(.84);opacity:0}to{transform:scale(1);opacity:1}}
+.mtitle{font-size:16px;font-weight:900;color:#cc88ff;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;text-shadow:0 0 15px rgba(139,0,255,.5);}
+.mbody{font-size:12px;font-weight:800;color:rgba(255,255,255,.48);line-height:1.7;margin-bottom:18px;text-transform:capitalize;white-space:pre-line;}
+
+/* ══════════════════════════════════════
+   SYSTEM SUMMARY
+══════════════════════════════════════ */
+#ss-ov{position:fixed;inset:0;z-index:7200;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:16px;padding-bottom:calc(16px + var(--sab));}
+#ss-ov.show{display:flex;}
+.ssbox{
+  background:linear-gradient(180deg,rgba(14,0,26,.99),rgba(8,0,16,.99));
+  border:1px solid rgba(139,0,255,.22);
+  border-top:2px solid rgba(139,0,255,.5);
+  border-radius:4px;padding:20px 15px;
+  width:100%;max-width:400px;max-height:90dvh;overflow-y:auto;
+  animation:popIn .28s cubic-bezier(.34,1.56,.64,1);
+}
+.sstitle{font-size:clamp(12px,3.8vw,16px);font-weight:900;text-align:center;text-transform:uppercase;letter-spacing:3px;margin-bottom:14px;color:#cc88ff;text-shadow:0 0 15px rgba(139,0,255,.5);}
+.ssrow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(139,0,255,.07);}
+.sskey{font-size:10px;font-weight:900;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px;}
+.ssval{font-size:11px;font-weight:900;color:#e8e0f0;font-family:'Share Tech Mono',monospace;}
+
+/* ══════════════════════════════════════
+   POSTURE OVERLAY
+══════════════════════════════════════ */
+#posture-ov{position:fixed;inset:0;z-index:8500;background:rgba(0,0,0,.97);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;}
+#posture-ov.show{display:flex;animation:fadeUp .4s ease;}
+.ptxt{font-size:clamp(18px,5vw,26px);font-weight:900;color:#cc88ff;letter-spacing:3px;text-align:center;text-transform:uppercase;text-shadow:0 0 20px rgba(139,0,255,.6);}
+
+/* ── DEBRIEF ── */
+#debrief-ov{position:fixed;inset:0;z-index:7600;background:rgba(0,0,0,.92);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:16px;padding-bottom:calc(16px + var(--sab));}
+#debrief-ov.show{display:flex;}
+
+/* ── DRILL MODAL ── */
+#drill-ov{position:fixed;inset:0;z-index:8200;background:rgba(0,0,0,.92);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:16px;padding-bottom:calc(16px + var(--sab));}
+#drill-ov.show{display:flex;}
+.drill-box{background:linear-gradient(180deg,rgba(20,0,5,.99),rgba(12,0,3,.99));border:1px solid rgba(255,0,60,.22);border-top:2px solid rgba(255,0,60,.5);border-radius:4px;padding:22px 15px;width:100%;max-width:420px;max-height:88dvh;overflow-y:auto;animation:popIn .22s cubic-bezier(.34,1.56,.64,1);}
+.drill-title{font-size:15px;font-weight:900;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;text-align:center;text-shadow:0 0 12px rgba(255,0,60,.4);}
+.drill-step{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,0,60,.07);}
+.drill-step:last-child{border:none;}
+.dstep-n{width:22px;height:22px;border-radius:2px;background:rgba(255,0,60,.12);color:var(--red);font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;clip-path:polygon(3px 0%,100% 0%,calc(100% - 3px) 100%,0% 100%);}
+.dstep-t{font-size:11px;font-weight:800;color:rgba(255,255,255,.7);text-transform:capitalize;line-height:1.5;}
+
+/* ── UTILS ── */
+.mb8{margin-bottom:8px;}
+.mb12{margin-bottom:12px;}
+.mb16{margin-bottom:16px;}
+.mt8{margin-top:8px;}
+.mt12{margin-top:12px;}
+</style>
+</head>
+<body>
+<canvas id="bgc"></canvas>
+<canvas id="cin"></canvas>
+
+<!-- TOP BANNERS -->
+<div class="top-ban" id="ban-nomobile">📵 No Mobile Today — Phone Down. Eyes Forward. Be A Ghost.</div>
+<div class="top-ban" id="ban-nosocial">🚫 No Social Media Today — No Instagram. No Reels. No YouTube.</div>
+
+<!-- BOOT -->
+<div id="boot">
+  <div class="b-logo">⚔ Monarch Zephyr</div>
+  <div class="b-sub">Hunter Operating System V5</div>
+  <div class="bl" id="bl0">Initializing System...<span class="cur"></span></div>
+  <div class="bl" id="bl1">Hunter Detected: Sam</div>
+  <div class="bl" id="bl2">Loading All Protocols...</div>
+  <div class="bl" id="bl3">All Systems Online. Arise.</div>
+  <div class="bbar-w"><div class="bbar" id="bbar"></div></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- HEADER -->
+  <div id="hdr">
+    <div class="hdr-title">⚔ Monarch Zephyr | Sam</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div class="hdr-date" id="hdr-date" style="margin-bottom:0;"></div>
+      <button id="voice-btn" onclick="toggleVoice()" style="background:rgba(157,0,255,.15);border:1px solid rgba(157,0,255,.3);border-radius:20px;color:#cc44ff;font-size:9px;font-weight:900;padding:3px 10px;cursor:pointer;font-family:'Jost',sans-serif;letter-spacing:.5px;flex-shrink:0;touch-action:manipulation;">🔊 Voice On</button>
+    </div>
+    <div class="hdr-hp-row">
+      <span class="hp-lbl" id="hp-txt">Hp 100/100</span>
+      <div class="hp-bar"><div class="hp-fill" id="hp-fill" style="width:100%"></div></div>
+      <span class="lvl-pill" id="lvl-pill">Lv 1</span>
+    </div>
+    <div class="hdr-quote" id="hdr-quote"></div>
+  </div>
+
+  <!-- TABS -->
+  <div id="tabbar">
+    <button class="tb act" onclick="goTab('grind',this)">⚔ Grind</button>
+    <button class="tb" onclick="goTab('karma',this)">☯ Karma</button>
+    <button class="tb" onclick="goTab('report',this)">📊 Report</button>
+    <button class="tb" onclick="goTab('protocol',this)">🔐 Protocol</button>
+    <button class="tb" onclick="goTab('dungeons',this)">🏯 Dungeons</button>
+    <button class="tb" onclick="goTab('ironforge',this)">🔥 Iron Forge</button>
+    <button class="tb" onclick="goTab('ascend',this)">✦ Ascend</button>
+    <button class="tb" onclick="goTab('capital',this)">💰 Capital</button>
+    <button class="tb" onclick="goTab('oracle',this)">🔮 Oracle</button>
+    <button class="tb" onclick="goTab('sys',this)">⚙ Sys</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+
+    <!-- GRIND -->
+    <div class="panel act" id="panel-grind">
+      <div class="qcard mb12">
+        <div class="qtxt" id="grind-qt">Loading...</div>
+        <div class="qsrc" id="grind-qs"></div>
+      </div>
+      <div class="s2 mb12">
+        <div class="sc"><div class="sv cc" id="sync-disp">0%</div><div class="sl">Sync Rate</div></div>
+        <div class="sc"><div class="sv cgold" id="streak-disp">0</div><div class="sl">Day Streak</div></div>
+      </div>
+      <div class="s2 mb12">
+        <div class="sc"><div class="sv cg" id="done-ct">0</div><div class="sl">Done</div></div>
+        <div class="sc"><div class="sv cr" id="pend-ct">0</div><div class="sl">Pending</div></div>
+      </div>
+      <div class="gc gc-c mb12">
+        <div class="st cc">Add Quest</div>
+        <input class="inp mb8" id="task-inp" placeholder="enter your quest for today..."/>
+        <button class="btn b-blue" onclick="addTask();R(event,this);P(event,'#00e5ff')">Add Quest</button>
+      </div>
+      <div class="gc mb12" style="border-color:rgba(251,191,36,.2);background:rgba(251,191,36,.03);">
+        <div class="st cgold">📖 Daily Report & Diary</div>
+        <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.3);margin-bottom:10px;line-height:1.5;">View today's full performance report. Copy it to your diary. Auto-triggers at 10PM.</div>
+        <button class="btn b-gold" onclick="showDailyReport();R(event,this);P(event,'#fbbf24')">View Today's Report</button>
+      </div>
+      <div class="gc">
+        <div class="st cc">Active Quests</div>
+        <div id="task-list"></div>
+        <div id="no-tasks" style="text-align:center;color:rgba(255,255,255,.18);font-size:13px;font-weight:800;padding:18px 0;">No Quests Added Yet</div>
+      </div>
+    </div>
+
+    <!-- KARMA -->
+    <div class="panel" id="panel-karma">
+      <div class="s2 mb12">
+        <div class="sc"><div class="sv cc" id="k-sync">0%</div><div class="sl">Sync Rate</div></div>
+        <div class="sc"><div class="sv cp" id="k-purity">0</div><div class="sl">Purity Streak</div></div>
+      </div>
+
+      <!-- SYSTEM VERDICT CARD -->
+      <div class="gc mb12" style="border-color:rgba(0,229,255,.25);text-align:center;">
+        <div class="st cc" style="text-align:center;margin-bottom:8px;">⚔ System Verdict</div>
+        <div id="verdict-msg" style="font-size:12px;font-weight:800;color:rgba(255,255,255,.4);line-height:1.6;text-transform:capitalize;">Complete Tasks Today To Earn A System Reward Tonight At Midnight.</div>
+      </div>
+
+      <!-- SYSTEM ASSIGNED REWARDS (shown when assigned) -->
+      <div class="gc gc-g mb12" id="sys-rew-wrap" style="display:none;">
+        <div class="st cg">🎁 System Assigned Reward</div>
+        <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.3);margin-bottom:12px;line-height:1.5;text-transform:capitalize;">System selected this for you — previous day tasks were above 80%. Claim when you execute it.</div>
+        <div id="sys-rew-list"></div>
+      </div>
+
+      <!-- SYSTEM ASSIGNED PENALTIES (shown when assigned) -->
+      <div class="gc gc-r mb12" id="sys-pen-wrap" style="display:none;">
+        <div class="st cr">⚡ System Assigned Penalty</div>
+        <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.3);margin-bottom:12px;line-height:1.5;text-transform:capitalize;">System punished you — previous day tasks were below 80%. You must endure. System decides. No escape.</div>
+        <div id="sys-pen-list"></div>
+      </div>
+
+      <!-- PURITY PROTOCOL -->
+      <div class="gc mb12" style="border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.03);">
+        <div class="st cp">🔱 Purity Protocol</div>
+        <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.28);margin-bottom:14px;line-height:1.6;text-transform:capitalize;">Masturbation control system. Every day clean builds your streak. Milestones give HP bonuses. Breach = heavy penalty.</div>
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="font-size:52px;font-weight:900;font-family:'Share Tech Mono',monospace;color:var(--purple);line-height:1;" id="purity-big">0</div>
+          <div style="font-size:11px;font-weight:900;color:rgba(168,85,247,.55);letter-spacing:2px;text-transform:capitalize;margin-top:4px;">Days Clean</div>
+          <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.22);margin-top:5px;" id="purity-last">Last Breach: Never</div>
+        </div>
+        <div id="purity-milestones" class="mb12"></div>
+        <button class="btn b-red" onclick="reportBreach();R(event,this);P(event,'#ff003c')">💀 Report Breach — Resets Streak</button>
+        <div style="font-size:10px;font-weight:800;color:rgba(255,0,60,.35);margin-top:6px;text-align:center;">Breach = -50 Hp + Streak Reset + Penalty Animation</div>
+      </div>
+      <div class="gc gc-g">
+        <div class="st cg">Daily Vitals</div>
+        <div class="lbl mb8">Water Intake — Target: 3L (+10 Hp If Met)</div>
+        <div style="display:flex;gap:8px;" class="mb8">
+          <input class="inp" id="water-inp" type="number" min="0" max="6" step="0.1" placeholder="e.g. 2.5" style="flex:1"/>
+          <button class="btn b-blue btn-sm" onclick="logWater();R(event,this)" style="flex-shrink:0;">Log</button>
+        </div>
+        <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.3);margin-bottom:16px;" id="water-disp">Logged: 0L / 3L</div>
+        <div class="lbl mb8">Sleep Hours — Target: 8H (+10 Hp If Met)</div>
+        <div style="display:flex;gap:8px;">
+          <input class="inp" id="sleep-inp" type="number" min="0" max="12" step="0.5" placeholder="e.g. 8" style="flex:1"/>
+          <button class="btn b-blue btn-sm" onclick="logSleep();R(event,this)" style="flex-shrink:0;">Log</button>
+        </div>
+        <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.3);margin-top:8px;" id="sleep-disp">Logged: 0H / 8H</div>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div class="panel" id="panel-report">
+      <div class="gc mb12">
+        <div class="st cc">30-Day Sync History</div>
+        <div class="cwrap"><canvas id="sync-chart" height="130"></canvas></div>
+      </div>
+      <div class="gc">
+        <div class="st cg">Weight Progress: 58Kg → 75Kg</div>
+        <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.35);margin-bottom:4px;" id="wt-lbl">Current: 58Kg</div>
+        <div class="wbar"><div class="wfill" id="wt-fill" style="width:0%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;font-weight:800;color:rgba(255,255,255,.2);margin-bottom:14px;"><span>58Kg</span><span>Target 75Kg</span></div>
+        <div class="cwrap"><canvas id="wt-chart" height="130"></canvas></div>
+      </div>
+    </div>
+
+    <!-- PROTOCOL -->
+    <div class="panel" id="panel-protocol">
+      <div class="gc gc-gold mb12">
+        <div class="st cgold">15-Day Grooming Protocol</div>
+        <p style="font-size:11px;font-weight:800;color:rgba(255,255,255,.35);margin-bottom:12px;line-height:1.5;text-transform:capitalize;">Complete each day's challenge. Unlocks daily. +10 Hp per day completed.</p>
+        <button class="btn b-gold" id="proto-btn" onclick="startProto();R(event,this)">Begin Protocol</button>
+      </div>
+      <div id="proto-days"></div>
+    </div>
+
+    <!-- DUNGEONS -->
+    <div class="panel" id="panel-dungeons">
+      <div class="gc gc-p mb12">
+        <div class="st cp">Open New Dungeon</div>
+        <div class="lbl mb8">Goal Name</div>
+        <input class="inp mb12" id="dng-name" placeholder="e.g. learn a new skill"/>
+        <div class="s2 mb12">
+          <div><div class="lbl mb8">Days</div><input class="inp" id="dng-d" type="number" min="0" placeholder="0"/></div>
+          <div><div class="lbl mb8">Hours</div><input class="inp" id="dng-h" type="number" min="0" max="23" placeholder="0"/></div>
+        </div>
+        <div class="lbl mb8">Minutes</div>
+        <input class="inp mb12" id="dng-m" type="number" min="0" max="59" placeholder="0"/>
+        <button class="btn b-purple" onclick="addDung();R(event,this);P(event,'#a855f7')">Activate Dungeon</button>
+      </div>
+      <div id="dung-list"></div>
+    </div>
+
+    <!-- IRON FORGE -->
+    <div class="panel" id="panel-ironforge">
+      <div class="gc gc-g mb12">
+        <div class="st cg">Today's Workout: <span id="split-name" class="cc">—</span></div>
+        <div id="workout-exs"></div>
+        <div id="workout-status-msg" style="display:none;padding:12px;border-radius:10px;text-align:center;font-size:13px;font-weight:900;margin-top:10px;"></div>
+        <div id="workout-btn-wrap" style="margin-top:10px;">
+          <button class="btn b-green mb8" id="btn-workout-done" onclick="workoutDone();R(event,this);P(event,'#10b981')">✓ Workout Done +50 Hp</button>
+          <button class="btn b-red" id="btn-workout-miss" onclick="workoutMissed();R(event,this);P(event,'#ff003c')">✗ Workout Missed -50 Hp</button>
+        </div>
+      </div>
+      <div class="gc gc-c mb12">
+        <div class="st cc">Nutrition Protocol</div>
+        <div style="font-size:10px;font-weight:900;color:rgba(255,255,255,.28);margin-bottom:10px;font-family:'Share Tech Mono',monospace;">Target: 2800 Kcal | 130G Protein Daily</div>
+        <div id="meal-list"></div>
+      </div>
+      <div class="gc gc-gold">
+        <div class="st cgold">Weekly Weigh-In</div>
+        <div class="lbl mb8">Current Weight (Kg)</div>
+        <input class="inp mb8" id="weigh-inp" type="number" min="40" max="200" step="0.1" placeholder="e.g. 60.5"/>
+        <button class="btn b-gold" onclick="logWeight();R(event,this)">Log Weight</button>
+        <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.3);margin-top:8px;" id="last-wt">Last Logged: —</div>
+      </div>
+    </div>
+
+    <!-- ASCEND -->
+    <div class="panel" id="panel-ascend">
+      <div class="s2 mb12">
+        <div class="sc" style="border-color:rgba(168,85,247,.22)"><div class="sv cp" id="glow-str">0</div><div class="sl">Glow Streak</div></div>
+        <div class="sc" style="border-color:rgba(0,229,255,.18)"><div class="sv cc" id="glow-done">0/9</div><div class="sl">Checks Done</div></div>
+      </div>
+      <div class="gc gc-p mb12">
+        <div class="st cp">Daily Glow-Up Checklist (+5 Hp Each)</div>
+        <div id="glow-list"></div>
+      </div>
+      <div class="gc gc-c mb12">
+        <div class="st cc">Morning Skin Routine</div>
+        <div id="skin-am"></div>
+      </div>
+      <div class="gc gc-p mb12">
+        <div class="st cp">Night Skin Routine</div>
+        <div id="skin-pm"></div>
+      </div>
+      <div class="gc gc-gold mb12">
+        <div class="st cgold">Style Notes For Sam</div>
+        <div id="style-notes"></div>
+      </div>
+      <div class="gc gc-g mb12">
+        <div class="st cg">Body Measurements Log</div>
+        <div class="lbl mb8">Chest (Cm)</div>
+        <input class="inp mb8" id="m-chest" type="number" placeholder="e.g. 88"/>
+        <div class="lbl mb8">Arms (Cm)</div>
+        <input class="inp mb8" id="m-arms" type="number" placeholder="e.g. 30"/>
+        <div class="lbl mb8">Waist (Cm)</div>
+        <input class="inp mb8" id="m-waist" type="number" placeholder="e.g. 72"/>
+        <div class="lbl mb8">Shoulders (Cm)</div>
+        <input class="inp mb12" id="m-shoulders" type="number" placeholder="e.g. 40"/>
+        <button class="btn b-green" onclick="saveMeas();R(event,this)">Save Measurements</button>
+        <div id="meas-disp" class="mt12"></div>
+      </div>
+      <div class="gc gc-p">
+        <div class="st cp">30-Day Baddie Protocol — Confidence Quest</div>
+        <button class="btn b-purple mb12" id="cq-btn" onclick="startCQ();R(event,this)">Activate Confidence Quest</button>
+        <div id="cq-list"></div>
+      </div>
+    </div>
+
+    <!-- CAPITAL -->
+    <div class="panel" id="panel-capital">
+      <div class="gc gc-gold mb12">
+        <div class="st cgold">Capital Reserve</div>
+        <div style="font-size:clamp(28px,8vw,42px);font-weight:900;color:var(--gold);font-family:'Share Tech Mono',monospace;margin-bottom:16px;" id="cap-disp">₹0</div>
+        <div class="lbl mb8">Deposit Amount</div>
+        <input class="inp mb8" id="dep-amt" type="number" placeholder="amount"/>
+        <div class="lbl mb8">Reason / Tag</div>
+        <input class="inp mb8" id="dep-tag" placeholder="e.g. salary, savings"/>
+        <button class="btn b-green mb16" onclick="doDeposit();R(event,this);P(event,'#10b981')">Deposit Capital</button>
+        <div class="lbl mb8">Deduct Amount</div>
+        <input class="inp mb8" id="ded-amt" type="number" placeholder="amount"/>
+        <div class="lbl mb8">Reason / Tag</div>
+        <input class="inp mb8" id="ded-tag" placeholder="e.g. food, shopping"/>
+        <button class="btn b-red" onclick="doDeduct();R(event,this);P(event,'#ff003c')">Deduct Capital</button>
+      </div>
+      <div class="gc">
+        <div class="st cgold">Transaction History</div>
+        <div id="ledger" style="max-height:45vh;overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <!-- SYS -->
+    <div class="panel" id="panel-sys">
+      <div class="gc gc-c mb12">
+        <div class="st cc">System Controls</div>
+        <button class="btn b-blue mb8" onclick="enableNotifs();R(event,this)">Enable Push Notifications</button>
+        <button class="btn b-green mb8" onclick="exportJSON();R(event,this)">Export Json Backup</button>
+        <button class="btn b-purple" onclick="importJSON();R(event,this)">Import Json Backup</button>
+        <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.18);margin-top:10px;font-family:'Share Tech Mono',monospace;" id="sys-info"></div>
+      </div>
+      <div class="gc gc-g mb12">
+        <div class="st cg">Add Custom Reward</div>
+        <div class="lbl mb8">Emoji</div>
+        <input class="inp mb8" id="cr-emoji" placeholder="e.g. 🎮" maxlength="4"/>
+        <div class="lbl mb8">Reward Name</div>
+        <input class="inp mb8" id="cr-name" placeholder="e.g. Gaming Session"/>
+        <div class="lbl mb8">Description</div>
+        <input class="inp mb8" id="cr-desc" placeholder="e.g. 2 hours of gaming"/>
+        <div class="lbl mb8">Hp Reward</div>
+        <input class="inp mb8" id="cr-hp" type="number" placeholder="e.g. 25" min="1"/>
+        <div class="lbl mb8">Capital Cost ₹ (Optional, 0 If None)</div>
+        <input class="inp mb12" id="cr-cost" type="number" placeholder="0" min="0"/>
+        <button class="btn b-green" onclick="addCR();R(event,this)">Add To Reward Arsenal</button>
+      </div>
+      <div class="gc gc-r mb12">
+        <div class="st cr">Add Custom Penalty</div>
+        <div class="lbl mb8">Emoji</div>
+        <input class="inp mb8" id="cp-emoji" placeholder="e.g. 🔥" maxlength="4"/>
+        <div class="lbl mb8">Penalty Name</div>
+        <input class="inp mb8" id="cp-name" placeholder="e.g. Extra Workout"/>
+        <div class="lbl mb8">Description / What To Do</div>
+        <textarea class="inp mb8" id="cp-desc" placeholder="describe the punishment..."></textarea>
+        <div class="lbl mb8">Hp Penalty</div>
+        <input class="inp mb12" id="cp-hp" type="number" placeholder="e.g. 25" min="1"/>
+        <button class="btn b-red" onclick="addCP();R(event,this)">Add To Penalty Vault</button>
+      </div>
+      <div class="gc gc-r">
+        <div class="st cr">System Purge</div>
+        <p style="font-size:11px;font-weight:800;color:rgba(255,255,255,.32);margin-bottom:12px;line-height:1.5;">Write minimum 50 words justification before purging all data.</p>
+        <textarea class="inp mb8" id="purge-txt" rows="5" placeholder="type your justification here... minimum 50 words required"></textarea>
+        <div style="font-size:11px;font-weight:900;color:rgba(255,255,255,.25);margin-bottom:10px;" id="purge-wc">0 / 50 Words</div>
+        <button class="btn b-red" onclick="doPurge();R(event,this)">Execute System Purge</button>
+      </div>
+    </div>
+
+    <!-- ORACLE TAB -->
+    <div class="panel" id="panel-oracle">
+      <div style="text-align:center;padding:20px 0 10px;">
+        <div id="oracle-rank-wrap" style="display:none;">
+          <div style="font-size:10px;font-weight:900;color:rgba(255,255,255,.3);letter-spacing:3px;margin-bottom:8px;text-transform:uppercase;">Hunter Rank — Sam</div>
+          <div id="oracle-rank" style="font-size:64px;font-weight:900;font-family:'Share Tech Mono',monospace;line-height:1;transition:all .5s;"></div>
+          <div id="oracle-rank-lbl" style="font-size:12px;font-weight:900;letter-spacing:2px;margin-top:8px;"></div>
+          <div id="oracle-avg" style="font-size:10px;font-weight:800;color:rgba(255,255,255,.3);margin-top:4px;font-family:'Share Tech Mono',monospace;"></div>
+          <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,.2),transparent);margin:16px 0;"></div>
+        </div>
+        <div id="oracle-scanning" style="display:none;padding:20px 0;">
+          <div style="font-size:12px;font-weight:900;color:var(--cyan);letter-spacing:2px;" id="oracle-scan-txt">Scanning System Data...</div>
+          <div style="width:60%;height:2px;background:rgba(0,229,255,.1);margin:12px auto;border-radius:2px;overflow:hidden;">
+            <div id="oracle-scan-bar" style="height:100%;width:0%;background:var(--cyan);transition:width .1s;border-radius:2px;"></div>
+          </div>
+        </div>
+      </div>
+      <div id="oracle-out"></div>
+      <div class="gc mb12" style="display:none;" id="oracle-today-wrap">
+        <div class="st cc">📋 Today's Smart Suggestions</div>
+        <div id="oracle-today"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- DAILY REPORT OVERLAY -->
+  <div id="report-ov" style="position:fixed;inset:0;z-index:8800;background:rgba(0,0,0,.96);backdrop-filter:blur(14px);display:none;flex-direction:column;overflow-y:auto;padding:20px 14px calc(20px + var(--sab));-webkit-overflow-scrolling:touch;">
+    <div style="max-width:460px;margin:0 auto;width:100%;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:11px;font-weight:900;color:rgba(0,229,255,.4);letter-spacing:3px;margin-bottom:6px;">◈ Daily End Report ◈</div>
+        <div style="font-size:clamp(18px,5vw,24px);font-weight:900;color:var(--cyan);" id="rpt-date"></div>
+        <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.3);margin-top:3px;" id="rpt-day"></div>
+      </div>
+      <!-- SYNC SCORE -->
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(0,229,255,.2);border-radius:14px;padding:16px;margin-bottom:12px;text-align:center;">
+        <div style="font-size:11px;font-weight:900;color:rgba(0,229,255,.5);letter-spacing:2px;margin-bottom:8px;">Today's Sync Rate</div>
+        <div style="font-size:52px;font-weight:900;font-family:'Share Tech Mono',monospace;" id="rpt-score"></div>
+        <div style="font-size:11px;font-weight:900;margin-top:6px;" id="rpt-verdict"></div>
+      </div>
+      <!-- TASKS DONE -->
+      <div style="background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:14px;padding:16px;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:900;color:var(--green);letter-spacing:1.5px;margin-bottom:10px;">✓ Completed Tasks</div>
+        <div id="rpt-done-list"></div>
+      </div>
+      <!-- TASKS MISSED -->
+      <div style="background:rgba(255,0,60,.05);border:1px solid rgba(255,0,60,.2);border-radius:14px;padding:16px;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:900;color:var(--red);letter-spacing:1.5px;margin-bottom:10px;">✗ Missed / Pending Tasks</div>
+        <div id="rpt-miss-list"></div>
+      </div>
+      <!-- STATS ROW -->
+      <div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:900;color:rgba(255,255,255,.4);letter-spacing:1.5px;margin-bottom:12px;">Daily Stats</div>
+        <div id="rpt-stats"></div>
+      </div>
+      <!-- MORAL STORY -->
+      <div style="background:linear-gradient(135deg,rgba(0,136,255,.07),rgba(168,85,247,.07));border:1px solid rgba(0,229,255,.18);border-radius:14px;padding:18px;margin-bottom:16px;position:relative;">
+        <div style="position:absolute;top:-8px;left:14px;font-size:32px;color:rgba(0,229,255,.12);font-family:serif;line-height:1;">"</div>
+        <div style="font-size:11px;font-weight:900;color:var(--cyan);letter-spacing:1.5px;margin-bottom:10px;">System's Word For Sam</div>
+        <div style="font-size:13px;font-weight:800;color:rgba(255,255,255,.75);line-height:1.8;font-style:italic;" id="rpt-story"></div>
+      </div>
+      <!-- BUTTONS -->
+      <button class="btn b-cyan mb8" onclick="copyReport();R(event,this)">📋 Copy For Diary</button>
+      <button class="btn b-red" onclick="closeReport();R(event,this)">Close Report</button>
+    </div>
+  </div>
+</div><!-- /app -->
+
+<!-- MODAL -->
+<div id="modal-ov">
+  <div class="mbox">
+    <div class="mtitle" id="m-title">Alert</div>
+    <div class="mbody" id="m-body"></div>
+    <div id="m-inp-w" style="display:none;margin-bottom:14px;"><input class="inp" id="m-inp" placeholder=""/></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn b-blue" id="m-ack" onclick="mAck();R(event,this)">Acknowledge</button>
+      <button class="btn b-red btn-sm" id="m-cancel" style="display:none;" onclick="mCancel();R(event,this)">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DRILL MODAL -->
+<div id="drill-ov">
+  <div class="drill-box">
+    <div class="drill-title" id="drill-title">Drill Protocol</div>
+    <div id="drill-steps"></div>
+    <button class="btn b-red mt12" onclick="document.getElementById('drill-ov').classList.remove('show');R(event,this)">Acknowledged — I Will Execute</button>
+  </div>
+</div>
+
+<!-- SYSTEM SUMMARY -->
+<div id="ss-ov">
+  <div class="ssbox">
+    <div class="sstitle">◈ System Status — Hunter: Sam ◈</div>
+    <div id="ss-rows"></div>
+    <button class="btn b-blue mt12" onclick="document.getElementById('ss-ov').classList.remove('show');R(event,this)">Acknowledge</button>
+  </div>
+</div>
+
+<!-- POSTURE -->
+<div id="posture-ov">
+  <canvas id="posture-c" width="80" height="120"></canvas>
+  <div class="ptxt">Check Your Posture, Sam.</div>
+  <div style="font-size:11px;font-weight:900;color:rgba(0,229,255,.4);font-family:'Share Tech Mono',monospace;text-align:center;">Shoulders Back. Chin Level. Spine Straight.</div>
+</div>
+
+<!-- DEBRIEF -->
+<div id="debrief-ov">
+  <div class="ssbox">
+    <div class="sstitle">◈ Weekly Debrief ◈</div>
+    <div id="db-rows"></div>
+    <div id="db-verdict" style="text-align:center;font-size:clamp(16px,5vw,20px);font-weight:900;margin:14px 0;letter-spacing:3px;text-transform:capitalize;"></div>
+    <button class="btn b-blue" onclick="document.getElementById('debrief-ov').classList.remove('show');R(event,this)">Acknowledge</button>
+  </div>
+</div>
+
+<!-- SCREEN TIMER -->
+<div id="scr-timer">📱 Free Screen: <span id="scr-val">2:00:00</span></div>
+
+<!-- TRAVEL BANNER (inside content, shown in grind tab) -->
+<div id="travel-banner" class="banner bn-gold" style="position:fixed;bottom:calc(14px + var(--sab));left:12px;right:60px;z-index:6400;border-radius:11px;display:none;">
+  🌍 <span id="travel-msg"></span>
+</div>
+
+<!-- MUSIC BANNER -->
+<div id="music-ban" class="banner bn-p" style="margin:0 0 12px;display:none;">🎵 Tonight: Music Mode Activated — Sleep Well, Sam.</div>
+
+<script>
+
+/* GSAP Inline Shim */
+var gsap=(function(){
+  function animate(el,from,to,dur,ease,cb){
+    if(!el)return;
+    var els=typeof el==='string'?document.querySelectorAll(el):[el];
+    els.forEach(function(e){
+      if(!e)return;
+      var start=performance.now();
+      var d=(dur||0.3)*1000;
+      var fk=from?Object.keys(from):[];
+      var tk=Object.keys(to||{});
+      var startVals={};
+      // capture start values
+      tk.forEach(function(k){
+        if(k==='x')startVals[k]=parseFloat(e.style.transform&&e.style.transform.match(/translateX\(([^)]+)\)/)?e.style.transform.match(/translateX\(([^)]+)\)/)[1]:0)||0;
+        else if(k==='y')startVals[k]=parseFloat(e.style.transform&&e.style.transform.match(/translateY\(([^)]+)\)/)?e.style.transform.match(/translateY\(([^)]+)\)/)[1]:0)||0;
+        else if(k==='opacity')startVals[k]=parseFloat(e.style.opacity||1);
+        else if(k==='scale')startVals[k]=1;
+        else if(k==='x'||k==='rotate')startVals[k]=0;
+        else startVals[k]=parseFloat(e.style[k])||0;
+      });
+      if(from){fk.forEach(function(k){
+        if(k==='opacity')e.style.opacity=from[k];
+        else if(k==='x'||k==='y'||k==='scale'){var t=e.style.transform||'';e.style.transform=t;}
+        else e.style[k]=from[k];
+      });}
+      function step(now){
+        var p=Math.min((now-start)/d,1);
+        var ep=p<0.5?2*p*p:-1+(4-2*p)*p; // ease in-out
+        tk.forEach(function(k){
+          var sv=from&&from[k]!==undefined?from[k]:startVals[k];
+          var ev=to[k];
+          if(typeof ev!=='number'&&typeof sv!=='number')return;
+          var val=sv+(ev-sv)*ep;
+          if(k==='opacity')e.style.opacity=val;
+          else if(k==='x'){var ct=e.style.transform.replace(/translateX\([^)]*\)/,'');e.style.transform=ct+'translateX('+val+'px)';}
+          else if(k==='y'){var ct=e.style.transform.replace(/translateY\([^)]*\)/,'');e.style.transform=ct+'translateY('+val+'px)';}
+          else if(k==='scale'){var ct=e.style.transform.replace(/scale\([^)]*\)/,'');e.style.transform=ct+'scale('+val+')';}
+          else e.style[k]=val+(/color|background/.test(k)?'':'');
+        });
+        if(p<1)requestAnimationFrame(step);
+        else if(cb)cb();
+      }
+      requestAnimationFrame(step);
+    });
+  }
+  return {
+    to:function(el,opts){animate(el,null,opts,opts.duration,opts.ease,opts.onComplete);},
+    from:function(el,opts){animate(el,opts,{opacity:1,x:0,y:0,scale:1},opts.duration,opts.ease,opts.onComplete);},
+    fromTo:function(el,from,to){
+      var d=to;
+      var cb=d.onComplete;
+      if(d.repeat&&d.yoyo){
+        // simple bounce for button punch
+        var orig={};
+        ['scale','x','y','opacity'].forEach(function(k){if(from[k]!==undefined)orig[k]=typeof el==='string'?1:(k==='opacity'?parseFloat(document.querySelector(el)||{style:{opacity:1}}.style.opacity||1):1);});
+        animate(el,from,to,(d.duration||0.1),d.ease,function(){
+          animate(el,to,from,(d.duration||0.1),d.ease,function(){if(cb)cb();});
+        });
+      } else {
+        animate(el,from,to,d.duration,d.ease,cb);
+      }
+    },
+    set:function(el,props){
+      var els=typeof el==='string'?document.querySelectorAll(el):[el];
+      els.forEach(function(e){if(!e)return;Object.keys(props).forEach(function(k){
+        if(k==='opacity')e.style.opacity=props[k];
+        else if(k==='x'){e.style.transform=(e.style.transform||'').replace(/translateX\([^)]*\)/,'')+'translateX('+props[k]+'px)';}
+        else if(k==='scale'){e.style.transform=(e.style.transform||'').replace(/scale\([^)]*\)/,'')+'scale('+props[k]+')';}
+        else e.style[k]=props[k];
+      });});
+    }
+  };
+})();
+
+
+/* DayJS Inline Shim */
+var dayjs=(function(){
+  var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var SMONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function Dayjs(d){this._d=d?new Date(d):new Date();}
+  Dayjs.prototype={
+    format:function(f){
+      var d=this._d;
+      var Y=d.getFullYear(),M=d.getMonth(),D=d.getDate();
+      var h=d.getHours(),m=d.getMinutes(),s=d.getSeconds();
+      var dow=d.getDay();
+      return f
+        .replace('YYYY',Y)
+        .replace('MM',String(M+1).padStart(2,'0'))
+        .replace('DD',String(D).padStart(2,'0'))
+        .replace('HH',String(h).padStart(2,'0'))
+        .replace('mm',String(m).padStart(2,'0'))
+        .replace('ss',String(s).padStart(2,'0'))
+        .replace('dddd',DAYS[dow])
+        .replace('ddd',DAYS[dow].slice(0,3))
+        .replace('MMMM',MONTHS[M])
+        .replace('MMM',SMONTHS[M])
+        .replace('D',D)
+        .replace('[W]ww',function(){
+          var jan1=new Date(Y,0,1);
+          var wk=Math.ceil(((d-jan1)/86400000+jan1.getDay()+1)/7);
+          return 'W'+String(wk).padStart(2,'0');
+        });
+    },
+    diff:function(other,unit){
+      var ms=this._d-(other&&other._d?other._d:new Date(other));
+      if(unit==='day')return Math.floor(ms/86400000);
+      if(unit==='hour')return Math.floor(ms/3600000);
+      return ms;
+    },
+    day:function(){return this._d.getDay();},
+    hour:function(){return this._d.getHours();},
+    minute:function(){return this._d.getMinutes();},
+    startOf:function(u){var d=new Date(this._d);if(u==='year')d.setMonth(0,1);d.setHours(0,0,0,0);return new Dayjs(d);},
+    valueOf:function(){return this._d.getTime();}
+  };
+  var fn=function(d){return new Dayjs(d);};
+  return fn;
+})();
+
+
+/* Chart.js Inline — Full Working Line Chart */
+var Chart=(function(){
+  var _instances={};
+  function Ch(canvas,cfg){
+    this.id=canvas.id||('c'+Date.now());
+    this.canvas=canvas;
+    this.cfg=cfg;
+    if(_instances[this.id]){try{_instances[this.id]._clear();}catch(e){}}
+    _instances[this.id]=this;
+    var self=this;
+    this._ro=new ResizeObserver(function(){self._draw();});
+    this._ro.observe(canvas.parentElement||canvas);
+    this._draw();
+  }
+  Ch.prototype._clear=function(){
+    if(this._ro)this._ro.disconnect();
+    var ctx=this.canvas.getContext('2d');
+    ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+    delete _instances[this.id];
+  };
+  Ch.prototype.destroy=function(){this._clear();};
+  Ch.prototype._draw=function(){
+    var canvas=this.canvas;
+    var cfg=this.cfg;
+    var parent=canvas.parentElement;
+    var W=parent?parent.clientWidth:300;
+    var H=parent?parent.clientHeight:160;
+    if(W<10)W=300;if(H<10)H=160;
+    var dpr=window.devicePixelRatio||1;
+    canvas.width=W*dpr;canvas.height=H*dpr;
+    canvas.style.width=W+'px';canvas.style.height=H+'px';
+    var ctx=canvas.getContext('2d');
+    ctx.scale(dpr,dpr);
+    ctx.clearRect(0,0,W,H);
+
+    var data=cfg.data||{};
+    var datasets=data.datasets||[];
+    var labels=data.labels||[];
+    var opts=cfg.options||{};
+    var scales=opts.scales||{};
+    var yO=scales.y||{};
+    var xO=scales.x||{};
+
+    // Padding
+    var PT=24,PR=12,PB=40,PL=46;
+    var pw=W-PL-PR,ph=H-PT-PB;
+    if(pw<10||ph<10)return;
+
+    // Compute Y range
+    var allV=[];
+    datasets.forEach(function(ds){
+      (ds.data||[]).forEach(function(v){if(typeof v==='number')allV.push(v);});
+    });
+    if(!allV.length){allV=[0,100];}
+    var yMin=yO.min!==undefined?yO.min:Math.floor(Math.min.apply(null,allV));
+    var yMax=yO.max!==undefined?yO.max:Math.ceil(Math.max.apply(null,allV));
+    if(yMax===yMin){yMin=yMin-5;yMax=yMax+5;}
+
+    function tx(i){return PL+(labels.length>1?i/(labels.length-1):0.5)*pw;}
+    function ty(v){return PT+(1-(v-yMin)/(yMax-yMin))*ph;}
+
+    // BG
+    ctx.fillStyle='rgba(0,0,0,0)';
+    ctx.fillRect(0,0,W,H);
+
+    // Grid + Y axis labels
+    var ySteps=5;
+    for(var yi=0;yi<=ySteps;yi++){
+      var yv=yMin+(yMax-yMin)*(yi/ySteps);
+      var yp=ty(yv);
+      ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(PL,yp);ctx.lineTo(PL+pw,yp);ctx.stroke();
+      var yCb=yO.ticks&&yO.ticks.callback;
+      var yLbl=yCb?yCb(Math.round(yv)*1):Math.round(yv);
+      ctx.fillStyle='rgba(255,255,255,.25)';
+      ctx.font='9px Share Tech Mono,monospace';
+      ctx.textAlign='right';ctx.textBaseline='middle';
+      ctx.fillText(String(yLbl),PL-5,yp);
+    }
+
+    // X axis labels
+    var maxXLabels=Math.floor(pw/36);
+    var xStep=Math.max(1,Math.ceil(labels.length/maxXLabels));
+    ctx.fillStyle='rgba(255,255,255,.25)';
+    ctx.font='9px Share Tech Mono,monospace';
+    ctx.textAlign='center';ctx.textBaseline='top';
+    for(var xi=0;xi<labels.length;xi+=xStep){
+      ctx.fillText(String(labels[xi]).slice(0,8),tx(xi),H-PB+6);
+    }
+
+    // Border
+    ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=1;
+    ctx.strokeRect(PL,PT,pw,ph);
+
+    // Datasets
+    datasets.forEach(function(ds,di){
+      var ddata=ds.data||[];
+      if(!ddata.length)return;
+      var col=ds.borderColor||['#00e5ff','#0088ff','#fbbf24'][di]||'#fff';
+      var bw=ds.borderWidth||2;
+      var dash=ds.borderDash||[];
+      var pr=ds.pointRadius!==undefined?ds.pointRadius:3;
+      var fill=ds.fill!==false&&ds.backgroundColor&&ds.backgroundColor!=='transparent';
+
+      // Clip to plot area
+      ctx.save();
+      ctx.beginPath();ctx.rect(PL-1,PT-1,pw+2,ph+2);ctx.clip();
+
+      ctx.setLineDash(dash);
+      ctx.strokeStyle=col;ctx.lineWidth=bw;
+      ctx.lineJoin='round';ctx.lineCap='round';
+
+      // Smooth line (bezier)
+      ctx.beginPath();
+      for(var i=0;i<ddata.length;i++){
+        var px=tx(i),py=ty(ddata[i]);
+        if(i===0){ctx.moveTo(px,py);}
+        else{
+          var ppx=tx(i-1),ppy=ty(ddata[i-1]);
+          var cpx=(ppx+px)/2;
+          ctx.bezierCurveTo(cpx,ppy,cpx,py,px,py);
+        }
+      }
+      ctx.stroke();
+
+      // Fill area
+      if(fill){
+        ctx.setLineDash([]);
+        ctx.lineTo(tx(ddata.length-1),ty(yMin));
+        ctx.lineTo(tx(0),ty(yMin));
+        ctx.closePath();
+        ctx.fillStyle=ds.backgroundColor;
+        ctx.fill();
+      }
+
+      // Points
+      if(pr>0){
+        ctx.setLineDash([]);
+        ctx.fillStyle=ds.pointBackgroundColor||col;
+        for(var i=0;i<ddata.length;i++){
+          ctx.beginPath();
+          ctx.arc(tx(i),ty(ddata[i]),pr,0,Math.PI*2);
+          ctx.fill();
+          // Hover glow on last point
+          if(i===ddata.length-1){
+            ctx.beginPath();
+            ctx.arc(tx(i),ty(ddata[i]),pr+3,0,Math.PI*2);
+            ctx.strokeStyle=col;ctx.lineWidth=1;ctx.globalAlpha=0.3;
+            ctx.stroke();ctx.globalAlpha=1;
+          }
+        }
+      }
+      ctx.restore();
+    });
+
+    // Legend
+    var legOpts=opts.plugins&&opts.plugins.legend;
+    if(!legOpts||legOpts.display!==false){
+      var lx=PL,ly=PT-12;
+      ctx.textBaseline='middle';ctx.textAlign='left';
+      datasets.forEach(function(ds){
+        if(!ds.label)return;
+        var col=ds.borderColor||'#fff';
+        ctx.fillStyle=col;
+        ctx.fillRect(lx,ly-3,12,2);
+        ctx.fillStyle='rgba(255,255,255,.4)';
+        ctx.font='9px Share Tech Mono,monospace';
+        ctx.fillText(ds.label,lx+16,ly);
+        lx+=ctx.measureText(ds.label).width+34;
+      });
+    }
+  };
+  Ch.register=function(){};
+  return Ch;
+})();
+
+
+</script>
+<script type="module">
+// ════════════════════════════════════════════════════════
+// FIREBASE IMPORTS (must be at top of module)
+// ════════════════════════════════════════════════════════
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// ════════════════════════════════════════════════════════
+// QUOTES — 55 total (Solo Leveling, Naruto, Goku, Vegeta, OS)
+// ════════════════════════════════════════════════════════
+const QUOTES=[
+  // Solo Leveling — 12
+  {t:"I Alone Level Up.",s:"— Solo Leveling, Sung Jin-Woo"},
+  {t:"Arise.",s:"— Solo Leveling, Shadow Monarch"},
+  {t:"The Weak Exist To Justify The Strong.",s:"— Solo Leveling"},
+  {t:"Shadow Monarchs Don't Rest. They Reload.",s:"— Solo Leveling"},
+  {t:"I Was Told I Was The Weakest. I Decided That Was Temporary.",s:"— Solo Leveling"},
+  {t:"Every Gate Is A Chance. Every Monster Is A Step.",s:"— Solo Leveling"},
+  {t:"I Don't Fight Because I Can Win. I Fight Because I Must.",s:"— Solo Leveling"},
+  {t:"The System Chose Me. Now I Choose To Become Unbreakable.",s:"— Solo Leveling"},
+  {t:"Fear Is Reasonable. Stopping Because Of It Is Not.",s:"— Solo Leveling"},
+  {t:"In This World, Only The Strong Survive. So I Will Be Strong.",s:"— Solo Leveling"},
+  {t:"They Said I Was Ranked E. I Made E Stand For Elite.",s:"— Solo Leveling"},
+  {t:"My Power Is The Sum Of Every Battle I Refused To Lose.",s:"— Solo Leveling"},
+  // Naruto — 10
+  {t:"I Never Go Back On My Word. That's My Ninja Way.",s:"— Naruto Uzumaki"},
+  {t:"I've Already Decided To Risk My Life. Nothing Will Stop Me.",s:"— Naruto Uzumaki"},
+  {t:"Pain Teaches People To Hate. But Pain Also Teaches Kindness.",s:"— Naruto Uzumaki"},
+  {t:"Believing In Your Own Power — That Is Your Ninja Way.",s:"— Naruto Uzumaki"},
+  {t:"People Who Risk Their Lives For Their Beliefs Are Truly Free.",s:"— Naruto Uzumaki"},
+  {t:"It's Not About Being The Best. It's About Being Better Than Yesterday.",s:"— Naruto Uzumaki"},
+  {t:"A Real Hero Is Born When He Protects Someone Else.",s:"— Naruto Uzumaki"},
+  {t:"Hard Work Is Worthless For Those That Don't Believe In Themselves.",s:"— Naruto Uzumaki"},
+  {t:"When You Give Up, Your Dreams And Everything Else — They're Gone.",s:"— Naruto Uzumaki"},
+  {t:"The Moment People Come To Know Love, They Run The Risk Of Carrying Hate.",s:"— Naruto Uzumaki"},
+  // Goku — 8
+  {t:"Power Comes In Response To A Need, Not A Desire.",s:"— Son Goku"},
+  {t:"I Am The Hope Of The Universe. The Answer To All Living Things That Cry For Peace.",s:"— Son Goku"},
+  {t:"Even At My Limit, I'll Keep Going Past It. That's The Saiyan Way.",s:"— Son Goku"},
+  {t:"Every Time I Get Knocked Down, I Get Back Up Stronger.",s:"— Son Goku"},
+  {t:"I'd Rather Die Fighting Than Live Knowing I Gave Up.",s:"— Son Goku"},
+  {t:"There's Always Someone Stronger. So I Train Every Day.",s:"— Son Goku"},
+  {t:"I'll Push Past My Limits One More Time. And The Time After That.",s:"— Son Goku"},
+  {t:"A Saiyan Fights Not For Pride But To Become Something Greater.",s:"— Son Goku"},
+  // Vegeta — 5
+  {t:"It's Not Over Until I Say It's Over. And I'm Not Saying It.",s:"— Vegeta"},
+  {t:"My Pride Is Not Words. It's Carved Into Every Single Rep.",s:"— Vegeta"},
+  {t:"I Do Not Train For Pride Alone. I Train To Surpass All Limits.",s:"— Vegeta"},
+  {t:"I Am The Prince Of All Saiyans. Weakness Is Not An Option.",s:"— Vegeta"},
+  {t:"Every Loss Is A Blueprint. I Study It And Come Back Stronger.",s:"— Vegeta"},
+  // Monarch Zephyr OS — 20
+  {t:"Pain Is Just Weakness Leaving The System.",s:"— Monarch Zephyr OS"},
+  {t:"Every Rep. Every Meal. Every Day. No Excuses.",s:"— Monarch Zephyr OS"},
+  {t:"The System Doesn't Care About Your Feelings. Execute.",s:"— Monarch Zephyr OS"},
+  {t:"A King Doesn't Ask For Permission To Rise.",s:"— Monarch Zephyr OS"},
+  {t:"Forge Yourself Daily Or The World Will Break You.",s:"— Monarch Zephyr OS"},
+  {t:"You're Not Tired. You're Undisciplined.",s:"— Monarch Zephyr OS"},
+  {t:"Rest Is Earned. Not Requested.",s:"— Monarch Zephyr OS"},
+  {t:"Small Daily Wins Stack Into Empires.",s:"— Monarch Zephyr OS"},
+  {t:"Sam Doesn't Quit. Sam Levels Up.",s:"— Monarch Zephyr OS"},
+  {t:"Silence The Noise. Execute The Protocol.",s:"— Monarch Zephyr OS"},
+  {t:"Glow Up Is A System, Not A Wish.",s:"— Monarch Zephyr OS"},
+  {t:"Monsters Are Made In The Quiet Hours.",s:"— Monarch Zephyr OS"},
+  {t:"No One Is Coming To Save You. That's The Point.",s:"— Monarch Zephyr OS"},
+  {t:"Stone By Stone. Rep By Rep. Rise.",s:"— Monarch Zephyr OS"},
+  {t:"Be The Version Of Sam That Future Sam Respects.",s:"— Monarch Zephyr OS"},
+  {t:"The Grind Doesn't Know Your Name. Make It Learn.",s:"— Monarch Zephyr OS"},
+  {t:"Fear Is A Liar. Stats Don't Lie.",s:"— Monarch Zephyr OS"},
+  {t:"Wake Up To Win. Or Sleep In Mediocrity.",s:"— Monarch Zephyr OS"},
+  {t:"A Real Baddie Is Built, Not Born.",s:"— Monarch Zephyr OS"},
+  {t:"Breathe. Then Attack.",s:"— Monarch Zephyr OS"},
+];
+
+// ════════════════════════════════════════════════════════
+// STATIC DATA
+// ════════════════════════════════════════════════════════
+const WORKOUTS=[
+  {name:"Push Day",exs:[{n:"Push-Ups",s:"4 × 15 Reps"},{n:"Diamond Push-Ups",s:"3 × 12 Reps"},{n:"Pike Push-Ups (Shoulders)",s:"3 × 15 Reps"},{n:"Chair Dips",s:"3 × 20 Reps"}]},
+  {name:"Pull Day",exs:[{n:"Table Rows",s:"4 × 10 Reps"},{n:"Towel Bicep Curls",s:"3 × 12 Reps"},{n:"Superman Holds",s:"3 × 15 Reps"},{n:"Reverse Snow Angels",s:"4 × 20 Reps"}]},
+  {name:"Legs + Core",exs:[{n:"Bodyweight Squats",s:"4 × 20 Reps"},{n:"Bulgarian Split Squats",s:"3 × 15 Reps"},{n:"Glute Bridges",s:"4 × 15 Reps"},{n:"Plank Hold",s:"3 × 30 Seconds"}]},
+  {name:"Rest Day",exs:[]}
+];
+const MEALS=[
+  {ico:"🥚",name:"Morning Fuel",det:"4 Boiled Eggs + 2 Bananas + 1 Glass Milk",key:"mA"},
+  {ico:"🍱",name:"Afternoon Power",det:"100G Soya Chunks Curry + 2 Roti Or Rice",key:"mB"},
+  {ico:"🥜",name:"Evening Snack",det:"30G Peanut Butter + 1 Banana",key:"mC"},
+  {ico:"🍳",name:"Night Recovery",det:"3 Eggs + 100G Soya Chunks",key:"mD"}
+];
+const GLOW_ITEMS=["Face Wash — Morning","Face Wash — Night","Moisturizer Applied (Spf Morning / Cream Night)","3L Water Intake Logged","8 Hours Sleep Logged","No Junk Food Today","Posture Check Done","Grooming Check (Hair, Nails, Beard)","Outfit Check (Fitted Clothes, Good Colors)"];
+const SKN_AM=[{s:1,t:"Gentle Cleanser — Wash Off Overnight Buildup"},{s:2,t:"Vitamin C Serum — Brightening For Wheatish Skin"},{s:3,t:"Light Moisturizer — Lock In Hydration"},{s:4,t:"Spf 50+ Sunscreen — Critical, Prevents Darkening"}];
+const SKN_PM=[{s:1,t:"Gentle Cleanser — Remove Dirt And Pollution"},{s:2,t:"Retinol (Optional, 2×/Week) — Cell Renewal"},{s:3,t:"Heavy Nourishing Moisturizer — Deep Repair"}];
+const STYLE_NOTES=["👔 Fitted Clothes Over Baggy For A 58Kg Frame — Structure Creates Shape","🎨 Colors For Wheatish Skin: Navy Blue, Olive, Burgundy, Off-White, Camel","⌚ A Clean Watch + Minimal Chain = Instant Upgrade","💇 Defined Hair Over Overgrown Mess. Style It Every Morning.","🧍 Shoulders Back, Chin Parallel To Floor. Do It Right Now.","🪥 Exfoliate 2× Per Week — Removes Dead Skin, Evens Tone"];
+const PROTO_TASKS=["Morning Routine: Wake Up, Splash Cold Water, Look Yourself In Mirror 30 Seconds.","Trim Or Style Your Hair. No More Overgrown Mess Today.","Clean Your Nails. Both Hands And Feet. No Exceptions.","Iron Or Fold Your Clothes Tonight For Tomorrow. Intentional Living.","Stand In Front Of Mirror. Fix Posture For 5 Full Minutes. Hold It.","Apply Sunscreen Before Stepping Outside. This Is Non-Negotiable.","Drink 3L Of Water Today. Track It. No Excuses.","Wear A Fitting Outfit In Your Color Palette: Navy, Olive, Burgundy.","Exfoliate Your Face Gently. Use A Mild Scrub.","No Screen Time For First 30 Minutes After Waking. Silence The Phone.","Do 50 Push-Ups At Any Point Today. No Skipping.","Clean Your Living Space Completely. Your Environment Is Your Mind.","Apply Vitamin C Serum On A Clean Face Tonight.","Write Down 3 Specific Things Sam Wants To Improve This Month.","Take A Progress Photo. Compare With Day 1. Own Your Journey."];
+const CQ_TASKS=["Make Eye Contact With 5 People Today And Hold It For 3 Seconds.","Start A Conversation With A Stranger. One Sentence Is Enough.","Walk Into A Room With Intention. Head Up, Shoulders Back, Controlled Pace.","Compliment Someone Sincerely. No Fake Compliments.","Sit In The Front Or Best Seat — Stop Hiding In The Back.","Wear Your Best Outfit. Dress Like You Already Leveled Up.","Record A 1-Minute Voice Note. Listen Back. Work On Tone.","Decline One Thing You Don't Want To Do. Practice Saying No.","Introduce Yourself Confidently. Name + One Clear Fact.","Stand Still In Public For 60 Seconds. Get Comfortable Being Seen.","Send A Message To Someone You Admire Or Want To Know.","Study Body Language 10 Minutes. Practice 3 Techniques Today.","Go Out Without Phone For 1 Hour. Be Fully Present.","Film Yourself Walking. Watch It. Correct Your Gait.","Do Something That Scares You Mildly. Social Risk Counts.","Wear A Statement Piece — One Bold Color Or Clean Accessory.","Respond With Full Sentences. No One-Word Answers Today.","Practice Smiling Naturally In Mirror For 2 Minutes.","Eat Alone In Public Without Looking At Phone.","Give A Firm Handshake To 3 People Today.","Disagree Politely But Clearly. Hold Your Ground.","Be The First To Speak In A Group Setting Today.","Take Up Space. Use The Full Chair. Spread Your Energy.","Learn One Conversation Starter And Use It On A Real Person.","Do Your Full Skincare Routine Without Rushing Tonight.","Tell Someone One Thing You're Genuinely Proud Of About Yourself.","Plan Tomorrow Night Before Sleeping. Intentionality Is Attractive.","Meditate For 10 Minutes. A Calm Mind Has A Calm Presence.","Review Your Journey From Day 1. Acknowledge How Far Sam Has Come.","Set 3 Bigger Goals For Next 30 Days. Baddie Protocol 2.0 Starts Now."];
+
+// ════════════════════════════════════════════════════════
+// FIXED REWARDS — hp is what Sam gains on Claim
+// ════════════════════════════════════════════════════════
+const FR=[
+  {id:"r_shop",   e:"🛍️",name:"Go Shopping",       desc:"Reward Yourself With A Shopping Trip. You Earned It.",                    hp:25,cost:0,       lock:null,      fn:"fnShop"},
+  {id:"r_movie",  e:"🎬",name:"Movie Night",        desc:"Sit Back And Watch A Film Tonight. Only Available On Saturdays.",         hp:25,cost:0,       lock:"sat",     fn:"fnMovie"},
+  {id:"r_food",   e:"🍔",name:"₹200 Fav Food",      desc:"Order Your Favourite Food. ₹200 Auto-Deducted From Capital.",             hp:20,cost:200,     lock:null,      fn:"fnFood"},
+  {id:"r_screen", e:"📱",name:"Free Screen 2 Hours",desc:"2 Hours Of Free Screen Time. Reels, Cartoons, Anything. Timer Starts.",   hp:20,cost:0,       lock:null,      fn:"fnScreen"},
+  {id:"r_reels",  e:"🎬",name:"Reels Time",          desc:"Scroll Reels, Watch Shorts, Enjoy. Guilt-Free.",                         hp:15,cost:0,       lock:null,      fn:"fnReels"},
+  {id:"r_cartoon",e:"🎌",name:"Watch Fav Cartoon",  desc:"Sit Down And Watch Your Favourite Cartoon Or Anime Episode.",             hp:15,cost:0,       lock:null,      fn:"fnCartoon"},
+  {id:"r_music",  e:"🎵",name:"Sleep With Music",   desc:"Tonight You Can Sleep Listening To Your Favourite Songs.",                hp:15,cost:0,       lock:null,      fn:"fnMusic"},
+  {id:"r_travel", e:"🌍",name:"Go Out Traveling",   desc:"Friday: Prepare Mode. Sunday: Go Out Day. Adventure Awaits Sam.",        hp:40,cost:0,       lock:"frisu",   fn:"fnTravel"},
+  {id:"r_snack",  e:"🍿",name:"Chill Snack Break",  desc:"Take A Proper Break. Eat Your Favourite Snack, No Guilt.",               hp:10,cost:0,       lock:null,      fn:"fnSnack"},
+  {id:"r_nap",    e:"😴",name:"Power Nap Pass",     desc:"Permission Granted For A 30-Minute Power Nap. Rest Is Earned.",          hp:10,cost:0,       lock:null,      fn:"fnNap"},
+];
+
+// ════════════════════════════════════════════════════════
+// FIXED PENALTIES — hp is negative
+// ════════════════════════════════════════════════════════
+const FP=[
+  {id:"p_pushup",  e:"💪",name:"Commando Push-Up Circuit",   hp:-50,
+   desc:"Indian Black Commando Style — 10 Sets × 20 Reps. Chest Must Touch Floor.",
+   drill:["Set 1–3: Standard Push-Ups — Chest To Floor, Full Extension. 20 Reps Each.","Set 4–5: Wide Grip Push-Ups — Targets Chest Width. 20 Reps Each.","Set 6–7: Diamond Push-Ups — Triceps On Fire. 20 Reps Each.","Set 8: Decline Push-Ups (Feet On Chair) — Upper Chest. 20 Reps.","Set 9: Slow-Mo — 3 Sec Down, 1 Hold, 3 Sec Up. 10 Reps.","Set 10: Max Rep Burnout — Go Until Failure. No Stopping."]},
+  {id:"p_pullup",  e:"🏋️",name:"Pull-Up & Row Circuit",     hp:-40,
+   desc:"8 Sets Of Maximum Reps With 30s Rest. Use Table Rows If No Bar.",
+   drill:["Set 1–4: Table Rows — Pull Chest To Edge, Full Range. Max Reps.","Set 5–6: Towel Door Rows — Lean Back, Pull To Standing. Max Reps.","Set 7: Negative Pull-Ups (If Bar) — Jump Up, Lower Slow. 8 Reps.","Set 8: Superman Hold — Lie Face Down, Lift Everything. 5 × 30s."]},
+  {id:"p_burpee",  e:"🔥",name:"Burpee Hell",                hp:-50,
+   desc:"5 Rounds Of 20 Burpees. No Rest Between Rounds. This Is Punishment.",
+   drill:["Round 1: 20 Burpees — Jump, Plank, Push-Up, Jump Back Up.","Round 2: 20 Burpees — Same Speed Or Faster.","Round 3: 20 Burpees — Your Lungs Are Burning. Keep Going.","Round 4: 20 Burpees — Mental Weakness Will Tell You To Stop. Ignore It.","Round 5: 20 Burpees — Last Round. Give Everything You Have Left."]},
+  {id:"p_wallsit", e:"🧱",name:"Wall Sit Punishment",        hp:-30,
+   desc:"5 Sets Of 2-Minute Wall Sits. Thighs Parallel To Floor. No Sliding.",
+   drill:["Find A Wall. Back Flat, Thighs Parallel, 90° Angle.","Hold For 2 Full Minutes Without Moving. Set 1.","Rest 30s. Repeat For Sets 2, 3, 4, 5.","If You Slide Early — Restart That Set.","5 Completed Sets = Penalty Served."]},
+  {id:"p_fulldrill",e:"🪖",name:"Full Body Commando Drill",  hp:-50,
+   desc:"3 Rounds: 20 Push-Ups + 20 Squats + 20 Mountain Climbers. Timed.",
+   drill:["Round 1: 20 Push-Ups → 20 Squats → 20 Mountain Climbers. No Rest Within.","Rest 60s. Then Round 2.","Rest 60s. Then Round 3.","Track Your Total Time. Beat It Next Penalty.","Bonus: Add 10 Burpees At End If Sam Is Still Standing."]},
+  {id:"p_nomobile",e:"📵",name:"No Mobile All Day",          hp:-30,
+   desc:"Phone Down For The Day. No Apps. No Calls Except Emergency.",
+   drill:["Put Phone In Another Room.","Only Check For Emergency Calls.","No Social Media, No YouTube, No Games.","Replace It: Read, Walk, Or Train.","Come Back Tomorrow Stronger."]},
+  {id:"p_nosocial",e:"🚫",name:"No Social Media All Day",    hp:-25,
+   desc:"No Instagram. No YouTube. No Reels. No Shorts. Today You Are Invisible Online.",
+   drill:["Log Out Of All Social Accounts.","Delete Apps For The Day Or Use App Blocker.","No Scrolling Reels Or Shorts.","Replace It: Train, Read, Or Go Outside.","Return Tomorrow With Full Focus."]},
+  {id:"p_5am",     e:"🌅",name:"5Am Wake-Up Protocol",       hp:-20,
+   desc:"Tomorrow: Rise At 5:00 AM. No Snooze. Train By 5:15 AM.",
+   drill:["Set Your Alarm For 5:00 AM Tonight Before Sleeping.","When It Rings: Get Up Immediately. Do Not Think. Just Rise.","Splash Cold Water On Face.","Do 25 Push-Ups Before Checking Phone.","The Early Morning Belongs To Hunters."]},
+  {id:"p_cleaneating",e:"🥗",name:"Clean Eating Punishment",hp:-20,
+   desc:"Today: Only Rice, Dal, Vegetables. Zero Junk. Zero Sugar. Zero Fried.",
+   drill:["Breakfast: Boiled Eggs + Oats Or Banana.","Lunch: Rice + Dal + One Vegetable Only.","Dinner: Soya Chunks + Vegetables.","Zero Processed Food. Zero Sugar. Zero Fried.","Eat Junk = Add 50 Push-Ups As Extra Penalty."]},
+  {id:"p_journal",e:"📓",name:"Journal 3 Pages",             hp:-15,
+   desc:"Write 3 Full Pages In A Notebook. No Phone Until Done.",
+   drill:["Get A Notebook And Pen. Phone In Another Room.","Page 1: Write Everything In Your Head Right Now.","Page 2: What Sam Did Wrong This Week And What Needs To Change.","Page 3: Exact Plan For The Next 7 Days.","Do Not Stop Until All 3 Pages Are Complete."]},
+];
+
+// ════════════════════════════════════════════════════════
+// STORAGE
+// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// FIREBASE SETUP — Cloud Sync (All Devices)
+// ════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyCUWYwxqQ1d30mjnFiMsouF1Hk7YGMN5G0",
+  authDomain: "monarch-zephyr.firebaseapp.com",
+  databaseURL: "https://monarch-zephyr-default-rtdb.firebaseio.com",
+  projectId: "monarch-zephyr",
+  storageBucket: "monarch-zephyr.firebasestorage.app",
+  messagingSenderId: "915483336167",
+  appId: "1:915483336167:web:48200afd4e3516dec13142",
+  measurementId: "G-0VLBBQKMRS"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+const DB_PATH = "sam/state";
+
+// ── LOCAL STORAGE (fallback cache) ──
+const NS="monarch_sam_";
+const SS={
+  get:k=>{try{return JSON.parse(localStorage.getItem(NS+k))}catch{return null}},
+  set:(k,v)=>localStorage.setItem(NS+k,JSON.stringify(v))
+};
+
+// ── DEFAULT STATE ──
+const DEFAULT_ST = {
+  hp:100, maxHp:100, level:1,
+  tasks:[], streak:0,
+  lastDate:null,
+  water:0, sleep:0,
+  capital:0, ledger:[],
+  history30:[], weightLog:[],
+  dungeons:[],
+  protocolStart:null, protocolDone:[],
+  glowChecks:[], glowStreak:0,
+  measurements:null, mealsDone:[],
+  cycleStart:dayjs().format("YYYY-MM-DD"),
+  cqStart:null, cqDone:[],
+  weeklyData:{workouts:0,meals:0,dungeons:0,hpChange:0},
+  workoutToday:null,
+  lastDebrief:null,
+  notifOn:false,
+  qIdx:0, qDate:null,
+  scrTimerEnd:null,
+  musicActive:false,
+  noMobileDay:null,
+  noSocialDay:null,
+  customRewards:[],
+  customPenalties:[],
+  claimedToday:[],
+  lastNightResult:null,
+  purityStreak:0,
+  purityLastBreach:null,
+  sysAssigned:null
+};
+
+// Load from localStorage as initial (fast start)
+let ST = Object.fromEntries(
+  Object.keys(DEFAULT_ST).map(k => [k, SS.get(k) ?? DEFAULT_ST[k]])
+);
+
+// ── SAVE — write to Firebase + localStorage ──
+let _saveTimer = null;
+function save(){
+  // Save to localStorage immediately
+  Object.keys(ST).forEach(k => SS.set(k, ST[k]));
+  // Debounce Firebase write (max 1 write per second)
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => {
+    set(ref(db, DB_PATH), ST).catch(e => console.warn("Firebase save failed:", e));
+  }, 800);
+}
+
+// ── SYNC FROM FIREBASE on load ──
+let _fbLoaded = false;
+onValue(ref(db, DB_PATH), (snapshot) => {
+  const data = snapshot.val();
+  if(data && typeof data === "object"){
+    // Merge Firebase data into ST
+    Object.keys(DEFAULT_ST).forEach(k => {
+      if(data[k] !== undefined) ST[k] = data[k];
+    });
+    // Also update localStorage cache
+    Object.keys(ST).forEach(k => SS.set(k, ST[k]));
+    if(!_fbLoaded){
+      _fbLoaded = true;
+      // Re-render everything with fresh cloud data
+      if(typeof updateHPUI === "function"){
+        updateHPUI(); updSync();
+        renderTasks(); renderIronForge(); renderAscend();
+        renderKarma(); renderCapital(); renderProto(); renderDungs();
+        loadQuote(); checkBanners();
+      }
+    }
+  } else if(!_fbLoaded){
+    _fbLoaded = true;
+    // No cloud data yet — push local data to Firebase
+    save();
+  }
+}, { onlyOnce: false });
+
+// ════════════════════════════════════════════════════════
+// BG CANVAS — Symbiote Tendrils
+// ════════════════════════════════════════════════════════
+(function(){
+  const c=document.getElementById("bgc"),ctx=c.getContext("2d");
+  let W,H;
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+  resize();window.addEventListener("resize",resize);
+
+  // Symbiote tendrils
+  var tendrils=[];
+  for(var i=0;i<18;i++){
+    tendrils.push({
+      x:Math.random()*W,y:Math.random()*H,
+      angle:Math.random()*Math.PI*2,
+      len:60+Math.random()*120,
+      spd:0.008+Math.random()*0.015,
+      waveAmp:15+Math.random()*30,
+      waveFreq:0.02+Math.random()*0.03,
+      phase:Math.random()*Math.PI*2,
+      alpha:0.04+Math.random()*0.08,
+      col:Math.random()>0.5?"#9d00ff":"#6c00ff",
+      drift:(-0.4+Math.random()*0.8)
+    });
+  }
+
+  // Floating orbs
+  var orbs=[];
+  for(var j=0;j<6;j++){
+    orbs.push({
+      x:Math.random()*W,y:Math.random()*H,
+      r:30+Math.random()*60,
+      alpha:0.015+Math.random()*0.025,
+      dx:(-0.3+Math.random()*0.6),dy:(-0.2+Math.random()*0.4),
+      phase:Math.random()*Math.PI*2
+    });
+  }
+
+  var tick=0;
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    tick+=0.016;
+
+    // Draw orbs (pulsing voids)
+    orbs.forEach(function(o){
+      o.phase+=0.012;
+      var pulse=1+Math.sin(o.phase)*0.3;
+      var g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r*pulse);
+      g.addColorStop(0,'rgba(80,0,180,'+o.alpha*2+')');
+      g.addColorStop(0.5,'rgba(40,0,100,'+o.alpha+')');
+      g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,o.r*pulse,0,Math.PI*2);ctx.fill();
+      o.x+=o.dx;o.y+=o.dy;
+      if(o.x<-o.r)o.x=W+o.r;if(o.x>W+o.r)o.x=-o.r;
+      if(o.y<-o.r)o.y=H+o.r;if(o.y>H+o.r)o.y=-o.r;
+    });
+
+    // Draw tendrils
+    tendrils.forEach(function(t){
+      t.phase+=t.spd;
+      t.x+=t.drift;
+      if(t.x<-20)t.x=W+20;if(t.x>W+20)t.x=-20;
+
+      ctx.save();
+      ctx.globalAlpha=t.alpha*(0.7+Math.sin(t.phase)*0.3);
+      ctx.strokeStyle=t.col;
+      ctx.lineWidth=1.2;
+      ctx.shadowColor=t.col;
+      ctx.shadowBlur=6;
+      ctx.beginPath();
+      var steps=12;
+      var sx=t.x,sy=t.y;
+      ctx.moveTo(sx,sy);
+      for(var s=1;s<=steps;s++){
+        var prog=s/steps;
+        var wave=Math.sin(t.phase+s*t.waveFreq*50)*t.waveAmp*(1-prog*0.5);
+        var nx=sx+Math.cos(t.angle+wave*0.05)*t.len*prog;
+        var ny=sy+Math.sin(t.angle)*t.len*prog+wave;
+        ctx.lineTo(nx,ny);
+      }
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // Occasional glitch flash
+    if(Math.random()>0.998){
+      ctx.save();ctx.globalAlpha=0.03;ctx.fillStyle="#9d00ff";ctx.fillRect(0,0,W,H);ctx.restore();
+    }
+
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+// ════════════════════════════════════════════════════════
+// CINEMATIC — Professional Particle + Energy System
+// ════════════════════════════════════════════════════════
+var CC=document.getElementById("cin");
+var CX=CC.getContext("2d");
+var cinAF=null;
+
+function setupCC(){
+  var dpr=window.devicePixelRatio||1;
+  CC.width=window.innerWidth*dpr;
+  CC.height=window.innerHeight*dpr;
+  CC.style.width=window.innerWidth+"px";
+  CC.style.height=window.innerHeight+"px";
+  CX.setTransform(dpr,0,0,dpr,0,0);
+}
+function clrCC(){CX.clearRect(0,0,window.innerWidth,window.innerHeight);}
+function cinEnd(){
+  if(cinAF){cancelAnimationFrame(cinAF);cinAF=null;}
+  clrCC();
+  CC.classList.remove("show");
+  document.getElementById("app").style.transform="";
+}
+
+// ── SYSTEM VOICE — VENOM MODE ────────────────────────────
+var voiceOn=true;
+function speak(text){
+  if(!voiceOn||!window.speechSynthesis)return;
+  try{
+    window.speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(text);
+    // Venom: ultra low pitch, slow & heavy
+    u.pitch=0.01;
+    u.rate=0.62;
+    u.volume=1.0;
+    var voices=window.speechSynthesis.getVoices();
+    // Prefer deepest male voice available
+    var deep=voices.find(function(v){
+      var n=v.name.toLowerCase();
+      return n.includes('david')||n.includes('daniel')||n.includes('alex')||n.includes('george')||n.includes('male')||n.includes('fred');
+    })||voices.find(function(v){return v.lang.startsWith('en');});
+    if(deep)u.voice=deep;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+function toggleVoice(){
+  voiceOn=!voiceOn;
+  var btn=document.getElementById('voice-btn');
+  if(btn){btn.textContent=voiceOn?'🔊 Voice On':'🔇 Voice Off';btn.style.opacity=voiceOn?'1':'0.45';}
+}
+
+// ── PARTICLE HELPERS ─────────────────────────────────────
+function lerp(a,b,t){return a+(b-a)*t;}
+function easeOut(t){return 1-Math.pow(1-t,3);}
+function easeIn(t){return t*t*t;}
+
+// ── REWARD ANIM 1 — ENERGY SURGE (Green Explosion) ──────
+function rewAnim1(cb){
+  setupCC();CC.classList.add("show");
+  speak("Achievement unlocked. Well done, Sam.");
+  var W=window.innerWidth,H=window.innerHeight;
+  var cx=W/2,cy=H/2;
+  var t=0,maxT=200;
+  var particles=[];
+  // Create burst particles
+  for(var i=0;i<80;i++){
+    var angle=Math.random()*Math.PI*2;
+    var spd=2+Math.random()*8;
+    var sz=2+Math.random()*5;
+    particles.push({
+      x:cx,y:cy,
+      vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd,
+      sz:sz,alpha:1,
+      col:['#9d00ff','#cc44ff','#6c00ff','#ffffff'][Math.floor(Math.random()*4)],
+      life:0.6+Math.random()*0.4
+    });
+  }
+  // Ring particles
+  var rings=[];
+  for(var r=0;r<3;r++){
+    rings.push({r:0,maxR:(r+1)*Math.min(W,H)*0.22,alpha:0.8,delay:r*15});
+  }
+
+  function frame(){
+    clrCC();
+    var p=t/maxT;
+    // Dark overlay
+    CX.fillStyle='rgba(0,0,0,'+(p<0.1?p*5:p>0.85?(1-p)*6.6:0.5)+')';
+    CX.fillRect(0,0,W,H);
+
+    // Expanding rings
+    rings.forEach(function(ring){
+      if(t<ring.delay)return;
+      var rp=Math.min((t-ring.delay)/60,1);
+      ring.r=ring.maxR*easeOut(rp);
+      ring.alpha=0.7*(1-rp);
+      CX.save();
+      CX.strokeStyle='rgba(157,0,255,'+ring.alpha+')';
+      CX.lineWidth=3-rp*2;
+      CX.shadowColor='#9d00ff';
+      CX.shadowBlur=20;
+      CX.beginPath();CX.arc(cx,cy,ring.r,0,Math.PI*2);CX.stroke();
+      CX.restore();
+    });
+
+    // Particles
+    particles.forEach(function(pk){
+      if(t>maxT*pk.life)return;
+      var lp=t/(maxT*pk.life);
+      pk.x+=pk.vx*(1-lp*0.7);
+      pk.y+=pk.vy*(1-lp*0.7);
+      pk.vy+=0.15;// gravity
+      pk.alpha=1-lp;
+      CX.save();
+      CX.globalAlpha=pk.alpha;
+      CX.shadowColor=pk.col;CX.shadowBlur=10;
+      CX.fillStyle=pk.col;
+      CX.beginPath();CX.arc(pk.x,pk.y,pk.sz*(1-lp*0.5),0,Math.PI*2);CX.fill();
+      CX.restore();
+    });
+
+    // Central glow
+    if(p<0.5){
+      var gp=p/0.5;
+      var g=CX.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.18*gp);
+      g.addColorStop(0,'rgba(157,0,255,'+(0.9*(1-gp))+')');
+      g.addColorStop(1,'rgba(157,0,255,0)');
+      CX.fillStyle=g;
+      CX.beginPath();CX.arc(cx,cy,Math.min(W,H)*0.18*gp,0,Math.PI*2);CX.fill();
+    }
+
+    // Text label
+    if(t>30){
+      var tp=Math.min((t-30)/30,1);
+      CX.save();
+      CX.globalAlpha=tp*(p>0.8?(1-p)*5:1);
+      CX.textAlign='center';CX.textBaseline='middle';
+      CX.shadowColor='#9d00ff';CX.shadowBlur=20;
+      CX.fillStyle='#cc44ff';
+      CX.font='900 '+Math.round(Math.min(W*0.09,48))+'px Jost,sans-serif';
+      CX.fillText('+ REWARD UNLOCKED',cx,cy-20);
+      CX.font='800 '+Math.round(Math.min(W*0.04,18))+'px Share Tech Mono,monospace';
+      CX.fillStyle='rgba(255,255,255,.7)';
+      CX.fillText('SYSTEM APPROVES',cx,cy+20);
+      CX.restore();
+    }
+
+    t++;
+    if(t<maxT){cinAF=requestAnimationFrame(frame);}
+    else{cinEnd();if(cb)cb();}
+  }
+  cinAF=requestAnimationFrame(frame);
+}
+
+// ── REWARD ANIM 2 — GOLD MATRIX RAIN ────────────────────
+function rewAnim2(cb){
+  setupCC();CC.classList.add("show");
+  speak("Excellent performance. Reward granted.");
+  var W=window.innerWidth,H=window.innerHeight;
+  var cols=Math.floor(W/18);
+  var drops=[];
+  for(var i=0;i<cols;i++) drops.push({y:-Math.random()*H,spd:2+Math.random()*4});
+  var chars="01ARISE⚔✦◈アイサムSAM上昇";
+  var t=0,maxT=190;
+
+  function frame(){
+    clrCC();
+    // Fade trail
+    CX.fillStyle='rgba(0,0,0,0.08)';
+    CX.fillRect(0,0,W,H);
+    CX.font='14px Share Tech Mono,monospace';
+    drops.forEach(function(d,i){
+      var x=i*18;
+      // Head char - bright
+      CX.fillStyle='rgba(251,191,36,1)';
+      CX.shadowColor='#fbbf24';CX.shadowBlur=8;
+      CX.fillText(chars[Math.floor(Math.random()*chars.length)],x,d.y);
+      // Trail chars
+      for(var j=1;j<6;j++){
+        CX.fillStyle='rgba(251,191,36,'+(0.8-j*0.13)+')';
+        CX.shadowBlur=2;
+        CX.fillText(chars[Math.floor(Math.random()*chars.length)],x,d.y-j*16);
+      }
+      d.y+=d.spd;
+      if(d.y>H+60) d.y=-Math.random()*100;
+    });
+    CX.shadowBlur=0;
+    // Big label at 40 frames
+    if(t>40){
+      var p=Math.min((t-40)/25,1);
+      var ep=easeOut(p);
+      CX.save();CX.globalAlpha=ep*(t>maxT-30?((maxT-t)/30):1);
+      CX.textAlign='center';CX.textBaseline='middle';
+      CX.fillStyle='rgba(0,0,0,0.6)';
+      CX.fillRect(W/2-180,H/2-40,360,80);
+      CX.strokeStyle='rgba(251,191,36,0.5)';CX.lineWidth=1;
+      CX.strokeRect(W/2-180,H/2-40,360,80);
+      CX.font='900 '+Math.round(Math.min(W*0.08,38))+'px Jost,sans-serif';
+      CX.fillStyle='#fbbf24';CX.shadowColor='#fbbf24';CX.shadowBlur=15;
+      CX.fillText('SYSTEM REWARD',W/2,H/2-10);
+      CX.font='800 '+Math.round(Math.min(W*0.035,15))+'px Share Tech Mono,monospace';
+      CX.fillStyle='rgba(255,255,255,.6)';CX.shadowBlur=0;
+      CX.fillText('HUNTER SAM — PROTOCOL APPROVED',W/2,H/2+18);
+      CX.restore();
+    }
+    t++;
+    if(t<maxT){cinAF=requestAnimationFrame(frame);}
+    else{cinEnd();if(cb)cb();}
+  }
+  cinAF=requestAnimationFrame(frame);
+}
+
+// ── PENALTY ANIM 1 — RED SHATTER (Glitch Effect) ────────
+function penAnim1(cb){
+  setupCC();CC.classList.add("show");
+  speak("Penalty protocol initiated. You failed, Sam.");
+  var W=window.innerWidth,H=window.innerHeight;
+  var t=0,maxT=200;
+  var shards=[];
+  var shaken=false;
+  // Create shards
+  var cols=8,rows=10;
+  for(var r=0;r<rows;r++){
+    for(var col=0;col<cols;col++){
+      shards.push({
+        x:col*W/cols,y:r*H/rows,
+        w:W/cols,h:H/rows,
+        vx:(-3+Math.random()*6)*(col<cols/2?-1:1),
+        vy:(-2+Math.random()*4)*(r<rows/2?-1:1),
+        rot:(-0.1+Math.random()*0.2),
+        alpha:1,
+        delay:Math.floor(Math.random()*30)
+      });
+    }
+  }
+
+  function frame(){
+    clrCC();
+    var p=t/maxT;
+
+    if(t===0){
+      // Flash red
+      CX.fillStyle='rgba(255,0,60,0.9)';
+      CX.fillRect(0,0,W,H);
+    }
+
+    // Shatter shards
+    shards.forEach(function(sh){
+      if(t<sh.delay) return;
+      var sp=(t-sh.delay)/80;
+      sh.alpha=Math.max(0,1-sp*1.2);
+      if(sh.alpha<=0)return;
+      CX.save();
+      CX.globalAlpha=sh.alpha;
+      var mx=sh.x+sh.w/2+sh.vx*(t-sh.delay)*1.2;
+      var my=sh.y+sh.h/2+sh.vy*(t-sh.delay)*1.2+((t-sh.delay)*0.8);
+      CX.translate(mx,my);
+      CX.rotate(sh.rot*(t-sh.delay));
+      CX.fillStyle='rgba(255,0,60,'+(0.15+Math.random()*0.1)+')';
+      CX.strokeStyle='rgba(255,0,60,'+sh.alpha+')';
+      CX.lineWidth=1;
+      CX.fillRect(-sh.w/2,-sh.h/2,sh.w,sh.h);
+      CX.strokeRect(-sh.w/2,-sh.h/2,sh.w,sh.h);
+      CX.restore();
+    });
+
+    // Shake app
+    if(t===30&&!shaken){
+      shaken=true;
+      var s=12,n=0;
+      var app=document.getElementById("app");
+      var iv2=setInterval(function(){
+        if(n>16){app.style.transform="";clearInterval(iv2);return;}
+        app.style.transform='translateX('+(s*Math.sin(n*1.3))+'px)';
+        s*=0.82;n++;
+      },16);
+    }
+
+    // Glitch text
+    if(t>20){
+      var tp=Math.min((t-20)/20,1);
+      CX.save();
+      CX.globalAlpha=tp;
+      // Glitch offset
+      var gx=t<80?(Math.random()-0.5)*8:0;
+      CX.textAlign='center';CX.textBaseline='middle';
+      CX.font='900 '+Math.round(Math.min(W*0.09,44))+'px Jost,sans-serif';
+      // Red channel offset
+      CX.fillStyle='rgba(255,0,60,0.7)';
+      CX.fillText('— PENALTY —',W/2+gx+3,H/2-15);
+      CX.fillStyle='rgba(0,229,255,0.7)';
+      CX.fillText('— PENALTY —',W/2+gx-3,H/2-15);
+      CX.fillStyle='#ffffff';
+      CX.fillText('— PENALTY —',W/2+gx,H/2-15);
+      CX.font='800 '+Math.round(Math.min(W*0.038,16))+'px Share Tech Mono,monospace';
+      CX.fillStyle='rgba(255,80,80,0.9)';CX.shadowColor='#ff003c';CX.shadowBlur=10;
+      CX.fillText('SYSTEM BREACH DETECTED — HP DEDUCTED',W/2,H/2+20);
+      CX.restore();
+    }
+
+    t++;
+    if(t<maxT){cinAF=requestAnimationFrame(frame);}
+    else{cinEnd();if(cb)cb();}
+  }
+  cinAF=requestAnimationFrame(frame);
+}
+
+// ── PENALTY ANIM 2 — VOID COLLAPSE ──────────────────────
+function penAnim2(cb){
+  setupCC();CC.classList.add("show");
+  speak("The system is disappointed. Penalty applied.");
+  var W=window.innerWidth,H=window.innerHeight;
+  var cx=W/2,cy=H/2;
+  var t=0,maxT=210;
+  var spiralPts=[];
+  for(var i=0;i<200;i++){
+    var angle=i*0.3;
+    var r=200-i*0.8;
+    spiralPts.push({x:cx+Math.cos(angle)*r,y:cy+Math.sin(angle)*r,a:angle});
+  }
+
+  function frame(){
+    clrCC();
+    var p=t/maxT;
+    CX.fillStyle='rgba(0,0,0,'+(p<0.15?p*4:0.6)+')';
+    CX.fillRect(0,0,W,H);
+
+    // Spiral collapse
+    var progress=Math.min(t/100,1);
+    spiralPts.forEach(function(pt,i){
+      var ip=i/spiralPts.length;
+      if(ip>progress)return;
+      var fade=1-(ip/progress);
+      var scale=1-progress*0.7;
+      CX.save();
+      CX.globalAlpha=fade*0.8;
+      CX.translate(cx+(pt.x-cx)*scale,cy+(pt.y-cy)*scale);
+      CX.fillStyle='rgba(255,0,60,'+(0.6+fade*0.4)+')';
+      CX.shadowColor='#ff003c';CX.shadowBlur=8;
+      CX.beginPath();CX.arc(0,0,2+fade*3,0,Math.PI*2);CX.fill();
+      CX.restore();
+    });
+
+    // Black hole center
+    var holeR=Math.min(W,H)*0.06*easeOut(Math.min(t/60,1));
+    var g=CX.createRadialGradient(cx,cy,0,cx,cy,holeR*2);
+    g.addColorStop(0,'rgba(0,0,0,1)');
+    g.addColorStop(0.5,'rgba(100,0,20,0.5)');
+    g.addColorStop(1,'rgba(255,0,60,0)');
+    CX.fillStyle=g;
+    CX.beginPath();CX.arc(cx,cy,holeR*2,0,Math.PI*2);CX.fill();
+
+    // Text
+    if(t>50){
+      var tp=Math.min((t-50)/25,1);
+      CX.save();CX.globalAlpha=tp*(p>0.85?(1-p)*6.7:1);
+      CX.textAlign='center';CX.textBaseline='middle';
+      CX.font='900 '+Math.round(Math.min(W*0.085,42))+'px Jost,sans-serif';
+      CX.fillStyle='var(--red)';CX.shadowColor='#ff003c';CX.shadowBlur=20;
+      CX.fillText('VOID PENALTY',cx,cy-18);
+      CX.font='800 '+Math.round(Math.min(W*0.035,14))+'px Share Tech Mono,monospace';
+      CX.fillStyle='rgba(255,100,100,.8)';CX.shadowBlur=5;
+      CX.fillText('THE SYSTEM ALWAYS COLLECTS',cx,cy+18);
+      CX.restore();
+    }
+
+    t++;
+    if(t<maxT){cinAF=requestAnimationFrame(frame);}
+    else{cinEnd();if(cb)cb();}
+  }
+  cinAF=requestAnimationFrame(frame);
+}
+
+// ── PENALTY ANIM 3 — ELECTRIC STORM ─────────────────────
+function penAnim3(cb){
+  setupCC();CC.classList.add("show");
+  speak("Protocol violated. Consequences are mandatory.");
+  var W=window.innerWidth,H=window.innerHeight;
+  var t=0,maxT=195;
+  var bolts=[];
+
+  function newBolt(){
+    var sx=Math.random()*W;
+    var pts=[{x:sx,y:0}];
+    var cy2=0;
+    while(cy2<H){
+      cy2+=20+Math.random()*40;
+      pts.push({x:pts[pts.length-1].x+(-60+Math.random()*120),y:cy2});
+    }
+    return{pts:pts,alpha:1,col:Math.random()>0.5?'#ff003c':'#ff6600'};
+  }
+
+  function frame(){
+    clrCC();
+    CX.fillStyle='rgba(0,0,0,0.15)';
+    CX.fillRect(0,0,W,H);
+
+    // Spawn bolts
+    if(t%8===0&&t<maxT*0.75) bolts.push(newBolt());
+
+    // Draw bolts
+    bolts.forEach(function(b,bi){
+      b.alpha-=0.04;
+      if(b.alpha<=0){bolts.splice(bi,1);return;}
+      CX.save();
+      CX.globalAlpha=b.alpha;
+      CX.strokeStyle=b.col;
+      CX.lineWidth=1.5+b.alpha*2;
+      CX.shadowColor=b.col;CX.shadowBlur=15;
+      CX.beginPath();
+      b.pts.forEach(function(pt,i){i===0?CX.moveTo(pt.x,pt.y):CX.lineTo(pt.x,pt.y);});
+      CX.stroke();
+      CX.restore();
+    });
+
+    // Red overlay pulse
+    if(t<60){
+      CX.fillStyle='rgba(255,0,60,'+(0.3*Math.sin(t*0.4)*((60-t)/60))+')';
+      CX.fillRect(0,0,W,H);
+    }
+
+    // Text
+    if(t>25){
+      var tp=Math.min((t-25)/20,1);
+      var p2=t/maxT;
+      CX.save();CX.globalAlpha=tp*(p2>0.85?(1-p2)*6.7:1);
+      CX.textAlign='center';CX.textBaseline='middle';
+      CX.font='900 '+Math.round(Math.min(W*0.085,42))+'px Jost,sans-serif';
+      CX.fillStyle='#ff003c';CX.shadowColor='#ff003c';CX.shadowBlur=25;
+      CX.fillText('STORM PENALTY',W/2,H/2-18);
+      CX.font='800 '+Math.round(Math.min(W*0.035,14))+'px Share Tech Mono,monospace';
+      CX.fillStyle='rgba(255,150,0,.9)';CX.shadowBlur=8;
+      CX.fillText('FAILURE HAS A PRICE — PAY IT',W/2,H/2+18);
+      CX.restore();
+    }
+
+    t++;
+    if(t<maxT){cinAF=requestAnimationFrame(frame);}
+    else{cinEnd();if(cb)cb();}
+  }
+  cinAF=requestAnimationFrame(frame);
+}
+
+function trigRew(cb){Math.random()>0.5?rewAnim1(cb):rewAnim2(cb);}
+function trigPen(cb){[penAnim1,penAnim2,penAnim3][Math.floor(Math.random()*3)](cb);}
+
+// ════════════════════════════════════════════════════════
+// POSTURE CANVAS
+// ════════════════════════════════════════════════════════
+function drawPostureC(){
+  const c=document.getElementById("posture-c"),ctx=c.getContext("2d");
+  const dpr=window.devicePixelRatio||1;
+  c.width=80*dpr;c.height=120*dpr;c.style.width="80px";c.style.height="120px";
+  ctx.scale(dpr,dpr);
+  ctx.strokeStyle="#00e5ff";ctx.lineWidth=3;ctx.lineCap="round";ctx.shadowColor="#00e5ff";ctx.shadowBlur=8;
+  ctx.beginPath();ctx.arc(40,12,10,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(40,22);ctx.lineTo(40,64);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(40,38);ctx.lineTo(16,52);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(40,38);ctx.lineTo(64,52);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(40,64);ctx.lineTo(26,96);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(40,64);ctx.lineTo(54,96);ctx.stroke();
+}
+
+// ════════════════════════════════════════════════════════
+// RIPPLE + PARTICLES (every button)
+// ════════════════════════════════════════════════════════
+function R(e,btn){
+  // ripple
+  const rd=document.createElement("span");rd.className="rpl-dot";
+  const rect=btn.getBoundingClientRect();
+  const sz=Math.max(rect.width,rect.height);
+  const cx=(e.touches?.[0]?.clientX??e.clientX)-rect.left-sz/2;
+  const cy=(e.touches?.[0]?.clientY??e.clientY)-rect.top-sz/2;
+  rd.style.cssText=`width:${sz}px;height:${sz}px;left:${cx}px;top:${cy}px;`;
+  btn.appendChild(rd);rd.addEventListener("animationend",()=>rd.remove());
+  // gsap punch
+  gsap.fromTo(btn,{scale:1},{scale:.88,duration:.1,ease:"power2.in",yoyo:true,repeat:1,onComplete:()=>gsap.to(btn,{scale:1,duration:.12,ease:"back.out(2)"})});
+}
+function P(e,col){
+  const x=e.touches?.[0]?.clientX??e.clientX??window.innerWidth/2;
+  const y=e.touches?.[0]?.clientY??e.clientY??window.innerHeight/2;
+  for(let i=0;i<10;i++){
+    const p=document.createElement("div");
+    p.style.cssText=`position:fixed;left:${x-3}px;top:${y-3}px;width:6px;height:6px;border-radius:50%;background:${col};z-index:9998;pointer-events:none;`;
+    document.body.appendChild(p);
+    const a=Math.random()*Math.PI*2,d=30+Math.random()*60;
+    gsap.to(p,{x:Math.cos(a)*d,y:Math.sin(a)*d,opacity:0,scale:0,duration:.55+Math.random()*.3,ease:"power2.out",onComplete:()=>p.remove()});
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════════════════
+function boot(){
+  setTimeout(()=>document.getElementById("bbar").style.width="100%",100);
+  ["bl0","bl1","bl2","bl3"].forEach((id,i)=>{
+    setTimeout(()=>gsap.to("#"+id,{opacity:1,x:0,duration:.35,ease:"power2.out"}),i*640);
+  });
+  setTimeout(()=>{
+    gsap.to("#boot",{opacity:0,duration:.4,onComplete:()=>{
+      document.getElementById("boot").style.display="none";
+      document.getElementById("app").style.display="flex";
+      init();
+    }});
+  },3100);
+}
+boot();
+
+// ════════════════════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════════════════════
+let _mRes=null;
+function showModal(title,body,hasInp=false,ph="",hasCancel=false){
+  return new Promise(r=>{
+    _mRes=r;
+    document.getElementById("m-title").textContent=title;
+    document.getElementById("m-body").textContent=body;
+    const iw=document.getElementById("m-inp-w"),ii=document.getElementById("m-inp");
+    iw.style.display=hasInp?"block":"none";
+    if(hasInp){ii.placeholder=ph||"";ii.value="";}
+    document.getElementById("m-cancel").style.display=hasCancel?"flex":"none";
+    document.getElementById("modal-ov").classList.add("show");
+  });
+}
+function mAck(){document.getElementById("modal-ov").classList.remove("show");const v=document.getElementById("m-inp").value;if(_mRes){_mRes({ok:true,value:v});_mRes=null;}}
+function mCancel(){document.getElementById("modal-ov").classList.remove("show");if(_mRes){_mRes({ok:false,value:""});_mRes=null;}}
+
+function showDrill(p){
+  document.getElementById("drill-title").textContent=p.e+" "+p.name+" — Drill Protocol";
+  document.getElementById("drill-steps").innerHTML=p.drill.map((s,i)=>`<div class="drill-step"><div class="dstep-n">${i+1}</div><div class="dstep-t">${s}</div></div>`).join("");
+  document.getElementById("drill-ov").classList.add("show");
+}
+
+// ════════════════════════════════════════════════════════
+// HP & LEVELING — 100% accurate
+// ════════════════════════════════════════════════════════
+function changeHP(delta){
+  ST.hp=Math.round((ST.hp+delta)*10)/10;
+  ST.weeklyData.hpChange=(ST.weeklyData.hpChange||0)+delta;
+  if(ST.hp>=ST.maxHp){
+    ST.level++;ST.maxHp=Math.round(ST.maxHp*1.5);ST.hp=Math.round(ST.maxHp*.5);
+    save();updateHPUI();
+    showModal("Level Up!","Sam Has Reached Level "+ST.level+"! Max Hp Is Now "+ST.maxHp+".");return;
+  }
+  if(ST.hp<0){
+    if(ST.level>1){ST.level--;ST.maxHp=Math.round(ST.maxHp/1.5);}
+    ST.hp=Math.round(ST.maxHp*.2);
+    save();updateHPUI();
+    showModal("Level Down!","System Integrity Compromised. Sam Dropped To Level "+ST.level+".");return;
+  }
+  save();updateHPUI();
+}
+function updateHPUI(){
+  const pct=Math.min(100,Math.max(0,(ST.hp/ST.maxHp)*100));
+  document.getElementById("hp-fill").style.width=pct+"%";
+  document.getElementById("hp-txt").textContent="Hp "+ST.hp+"/"+ST.maxHp;
+  document.getElementById("lvl-pill").textContent="Lv "+ST.level;
+}
+
+// ════════════════════════════════════════════════════════
+// SYNC RATE — INSTANT, ZERO DELAY
+// ════════════════════════════════════════════════════════
+function getSR(){if(!ST.tasks.length)return 0;return Math.round(ST.tasks.filter(t=>t.done).length/ST.tasks.length*100);}
+function updSync(){
+  const r=getSR()+"%";
+  ["sync-disp","k-sync"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=r;});
+  document.getElementById("done-ct").textContent=ST.tasks.filter(t=>t.done).length;
+  document.getElementById("pend-ct").textContent=ST.tasks.filter(t=>!t.done).length;
+  document.getElementById("streak-disp").textContent=ST.streak;
+  document.getElementById("k-purity").textContent=ST.purityStreak||0;
+}
+
+// ════════════════════════════════════════════════════════
+// TASKS
+// ════════════════════════════════════════════════════════
+function addTask(){
+  const inp=document.getElementById("task-inp");
+  const txt=inp.value.trim();if(!txt)return;
+  ST.tasks.push({id:Date.now(),text:toTC(txt),done:false});
+  save();renderTasks();updSync();inp.value="";
+}
+function toggleTask(id){
+  const t=ST.tasks.find(t=>t.id===id);if(!t)return;
+  t.done=!t.done;
+  if(t.done)trigRew(()=>changeHP(25));
+  else changeHP(-25);
+  save();renderTasks();updSync();
+}
+function delTask(id){
+  const i=ST.tasks.findIndex(t=>t.id===id);
+  if(i>-1){ST.tasks.splice(i,1);save();renderTasks();updSync();}
+}
+function renderTasks(){
+  const list=document.getElementById("task-list"),noT=document.getElementById("no-tasks");
+  list.innerHTML="";noT.style.display=ST.tasks.length?"none":"block";
+  ST.tasks.forEach(t=>{
+    const d=document.createElement("div");d.className="ti"+(t.done?" done":"");
+    d.innerHTML=`<input type="checkbox" class="ticb" ${t.done?"checked":""} onchange="toggleTask(${t.id})"/><span class="titxt">${t.text}</span><button class="tidel" onclick="delTask(${t.id})">✕</button>`;
+    list.appendChild(d);
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// MIDNIGHT RESET — exact logic
+// ════════════════════════════════════════════════════════
+// ── MIDNIGHT 80% REWARD/PENALTY SHUFFLE ──────────────────
+function getMidnightReward(){
+  // Eligible: all fixed rewards except day-locked ones (sat, frisu)
+  // + custom rewards. Travel/movie skipped if wrong day.
+  const today=dayjs().day();
+  const eligible=[
+    ...FR.filter(r=>r.lock===null),
+    ...ST.customRewards
+  ];
+  if(!eligible.length)return null;
+  return eligible[Math.floor(Math.random()*eligible.length)];
+}
+function getMidnightPenalty(){
+  const eligible=[...FP,...ST.customPenalties];
+  if(!eligible.length)return null;
+  return eligible[Math.floor(Math.random()*eligible.length)];
+}
+
+function checkMidnight(){
+  const today=dayjs().format("YYYY-MM-DD");
+  if(ST.lastDate&&ST.lastDate!==today){
+    // 1. Capture score BEFORE resetting tasks
+    const score=getSR();
+    const totalTasks=ST.tasks.length;
+    ST.history30.push({date:ST.lastDate,score});
+    if(ST.history30.length>30)ST.history30.shift();
+
+    // 2. Pending tasks -25 each
+    const pend=ST.tasks.filter(t=>!t.done).length;
+    if(pend>0)changeHP(-pend*25);
+
+    // 3. Missed meals -5 each
+    const missedMeals=MEALS.filter(m=>!ST.mealsDone.includes(m.key)).length;
+    if(missedMeals>0)changeHP(-missedMeals*5);
+
+    // 4. Water check
+    if(ST.water>0&&ST.water<2)changeHP(-10);
+    else if(ST.water>=3)changeHP(10);
+
+    // 5. Sleep check
+    if(ST.sleep>0&&ST.sleep<6)changeHP(-15);
+    else if(ST.sleep>=8)changeHP(10);
+
+    // 6. Glow streak
+    const glowFull=ST.glowChecks.length===GLOW_ITEMS.length;
+    if(glowFull){ST.glowStreak++;}
+    else if(ST.glowStreak>0){ST.glowStreak=0;changeHP(-15);}
+
+    // 7. Streak bonus
+    if(ST.streak>0)changeHP(ST.streak*2);
+
+    // 8. ── PURITY STREAK INCREMENT ─────────────────────
+    ST.purityStreak = (ST.purityStreak||0) + 1;
+    checkPurityMilestones();
+
+    // 9. ── 80% RULE — SYSTEM ASSIGNS REWARD OR PENALTY ──
+    if(totalTasks>0){
+      if(score>80){
+        assignSystemItems("reward", score);
+        var _rItems=ST.sysAssigned?ST.sysAssigned.items:[];
+        var _rNames=_rItems.map(function(r){return r.name;}).join(" & ")||"Reward";
+        var _rEmoji=_rItems.length?(_rItems[0].e||"🎁"):"🎁";
+        var _rHp=_rItems.reduce(function(a,r){return a+(r.hp||0);},0);
+        var _rFirstItem=ST.sysAssigned&&ST.sysAssigned.items&&ST.sysAssigned.items[0]||null;
+        ST.lastNightResult={
+          type:"reward",
+          score:score,
+          date:ST.lastDate,
+          name:_rFirstItem?_rFirstItem.name:"Reward Earned",
+          emoji:_rFirstItem&&_rFirstItem.e?_rFirstItem.e:"🎁",
+          hp:_rFirstItem?_rFirstItem.hp:25
+        };
+      } else {
+        assignSystemItems("penalty", score);
+        var _pItems=ST.sysAssigned?ST.sysAssigned.items:[];
+        var _pNames=_pItems.map(function(p){return p.name;}).join(" & ")||"Penalty";
+        var _pEmoji=_pItems.length?(_pItems[0].e||"⚡"):"⚡";
+        var _pHp=_pItems.reduce(function(a,p){return a+(p.hp||0);},0);
+        var _pFirstItem=ST.sysAssigned&&ST.sysAssigned.items&&ST.sysAssigned.items[0]||null;
+        ST.lastNightResult={
+          type:"penalty",
+          score:score,
+          date:ST.lastDate,
+          name:_pFirstItem?_pFirstItem.name:"Penalty Applied",
+          emoji:_pFirstItem&&_pFirstItem.e?_pFirstItem.e:"⚡",
+          hp:_pFirstItem?_pFirstItem.hp:-25
+        };
+      }
+    } else {
+      ST.sysAssigned=null;
+      ST.lastNightResult=null;
+    }
+    // ──────────────────────────────────────────────────────
+
+    // 9. Reset daily data
+    ST.tasks=[];ST.mealsDone=[];ST.water=0;ST.sleep=0;ST.glowChecks=[];
+    ST.musicActive=false;ST.claimedToday=[];ST.workoutToday=null;
+    save();
+  }
+  ST.lastDate=today;save();
+}
+
+// ════════════════════════════════════════════════════════
+// REWARD CLAIM FUNCTIONS
+// ════════════════════════════════════════════════════════
+function isSat(){return dayjs().day()===6;}
+function isFri(){return dayjs().day()===5;}
+function isSun(){return dayjs().day()===0;}
+
+async function fnShop(r){
+  const res=await showModal("Go Shopping 🛍️","Enter Amount To Deduct From Capital (0 If None):",true,"₹ amount",true);
+  if(!res.ok)return;
+  const amt=parseFloat(res.value)||0;
+  if(amt>0){if(amt>ST.capital){showModal("Insufficient Funds","Not Enough Capital.");return;}ST.capital-=amt;addLedger("deduct",amt,"Shopping Reward");}
+  finishClaim(r);
+}
+async function fnMovie(r){
+  if(!isSat()){showModal("Locked 🔒","Movie Night Is Only Available On Saturdays. Come Back Then.");return;}
+  finishClaim(r);showModal("Movie Night 🎬","Sit Back And Watch A Film Tonight, Sam. You Earned This.");
+}
+async function fnFood(r){
+  if(ST.capital<200){showModal("Insufficient Funds","You Need At Least ₹200 In Capital.");return;}
+  const res=await showModal("₹200 Fav Food 🍔","₹200 Will Be Deducted From Capital. Confirm?",false,"",true);
+  if(!res.ok)return;
+  ST.capital-=200;addLedger("deduct",200,"₹200 Fav Food Reward");
+  finishClaim(r);
+}
+function fnScreen(r){
+  ST.scrTimerEnd=Date.now()+2*60*60*1000;save();
+  startScrTimer();finishClaim(r);
+}
+function fnReels(r){finishClaim(r);showModal("Reels Time 🎬","Scroll Away, Sam. Guilt-Free. You Earned It.");}
+function fnCartoon(r){finishClaim(r);showModal("Cartoon Time 🎌","Sit Back And Watch Your Favourite Show. Enjoy Every Minute.");}
+function fnMusic(r){ST.musicActive=true;save();document.getElementById("music-ban").classList.add("show");finishClaim(r);}
+function fnTravel(r){
+  if(isFri()){showModal("Travel Mode — Prepare 🌍","Today Is Friday. Start Packing. Plan Your Route. Sunday Is Your Adventure Day, Sam.");changeHP(r.hp/2);save();}
+  else if(isSun()){finishClaim(r);showModal("GO OUT TODAY 🌍","Today Is Your Day, Sam. Go Out. Explore. Make A Memory.");}
+  else{showModal("Travel Reward","Friday: Get Ready. Sunday: Go Out. Check Back Then.");}
+}
+function fnSnack(r){finishClaim(r);showModal("Snack Time 🍿","Enjoy Your Snack Break. You Earned A Rest, Sam.");}
+function fnNap(r){finishClaim(r);showModal("Power Nap 😴","30 Minutes. Set An Alarm. Close Your Eyes. Rest Is Part Of The Protocol.");}
+
+function finishClaim(r){
+  trigRew(()=>changeHP(r.hp));
+  ST.claimedToday=ST.claimedToday||[];
+  if(!ST.claimedToday.includes(r.id))ST.claimedToday.push(r.id);
+  save();renderCapital();renderKarma();
+}
+
+// ════════════════════════════════════════════════════════
+// PENALTY ENDURE FUNCTIONS
+// ════════════════════════════════════════════════════════
+async function endurePen(p){
+  const res=await showModal(p.e+" "+p.name,p.desc+"\n\n"+Math.abs(p.hp)+" Hp Will Be Deducted. Ready To Endure?",false,"",true);
+  if(!res.ok)return;
+  changeHP(p.hp);// hp is already negative
+  trigPen(()=>{});
+  if(p.drill&&p.drill.length)showDrill(p);
+  if(p.id==="p_nomobile"){ST.noMobileDay=dayjs().format("YYYY-MM-DD");save();document.getElementById("ban-nomobile").classList.add("show");}
+  if(p.id==="p_nosocial"){ST.noSocialDay=dayjs().format("YYYY-MM-DD");save();document.getElementById("ban-nosocial").classList.add("show");}
+  save();renderKarma();
+}
+
+async function endureCustomPen(id){
+  const p=ST.customPenalties.find(x=>x.id===id);if(!p)return;
+  const res=await showModal(p.e+" "+p.name,p.desc+"\n\n"+Math.abs(p.hp)+" Hp Will Be Deducted.",false,"",true);
+  if(!res.ok)return;
+  changeHP(-Math.abs(p.hp));trigPen(()=>{});save();renderKarma();
+}
+
+async function claimCustomRew(id){
+  const r=ST.customRewards.find(x=>x.id===id);if(!r)return;
+  if(r.cost>0){
+    if(ST.capital<r.cost){showModal("Insufficient Funds","Need ₹"+r.cost+" In Capital.");return;}
+    const res=await showModal("Claim: "+r.name,"₹"+r.cost+" Will Be Deducted. Confirm?",false,"",true);
+    if(!res.ok)return;
+    ST.capital-=r.cost;addLedger("deduct",r.cost,r.name+" Reward");
+  }
+  finishClaim(r);
+}
+
+// ════════════════════════════════════════════════════════
+// RENDER KARMA — Rewards + Penalties
+// ════════════════════════════════════════════════════════
+function renderKarma(){
+  updSync();
+
+  // ── PURITY PROTOCOL ──────────────────────────────────
+  document.getElementById("purity-big").textContent = ST.purityStreak||0;
+  const lastB = ST.purityLastBreach;
+  document.getElementById("purity-last").textContent = lastB ? "Last Breach: "+dayjs(lastB).format("MMM D YYYY") : "Last Breach: Never";
+
+  const MILESTONES=[
+    {days:3,  hp:10,  label:"3 Days Clean",   desc:"+10 Hp Bonus"},
+    {days:7,  hp:30,  label:"7 Days Clean",   desc:"+30 Hp Bonus"},
+    {days:15, hp:75,  label:"15 Days Clean",  desc:"+75 Hp Bonus"},
+    {days:30, hp:150, label:"30 Days Clean",  desc:"+150 Hp Bonus"},
+  ];
+  const ms = document.getElementById("purity-milestones");
+  ms.innerHTML = MILESTONES.map(m=>{
+    const done = (ST.purityStreak||0) >= m.days;
+    const near = !done && (ST.purityStreak||0) >= m.days-2;
+    const col  = done?"var(--green)":near?"var(--gold)":"rgba(255,255,255,.22)";
+    const bg   = done?"rgba(16,185,129,.08)":near?"rgba(251,191,36,.06)":"rgba(255,255,255,.02)";
+    const border=done?"rgba(16,185,129,.25)":near?"rgba(251,191,36,.2)":"rgba(255,255,255,.06)";
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid ${border};background:${bg};margin-bottom:7px;">
+      <div style="font-size:20px;">${done?"✅":near?"🔥":"🔒"}</div>
+      <div style="flex:1;">
+        <div style="font-size:12px;font-weight:900;color:${col};text-transform:capitalize;">${m.label}</div>
+        <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.3);">${m.desc}</div>
+      </div>
+      ${done?`<span style="font-size:10px;font-weight:900;color:var(--green);">Earned</span>`:`<span style="font-size:10px;font-weight:800;color:${col};">${m.days-(ST.purityStreak||0)} Days Left</span>`}
+    </div>`;
+  }).join("");
+
+  // ── SYSTEM ASSIGNED REWARDS/PENALTIES ────────────────
+  const sa = ST.sysAssigned;
+  const rewWrap  = document.getElementById("sys-rew-wrap");
+  const penWrap  = document.getElementById("sys-pen-wrap");
+  const rewList  = document.getElementById("sys-rew-list");
+  const penList  = document.getElementById("sys-pen-list");
+  const verdMsg  = document.getElementById("verdict-msg");
+
+  rewWrap.style.display="none";
+  penWrap.style.display="none";
+  rewList.innerHTML="";
+  penList.innerHTML="";
+
+  if(sa && sa.items && sa.items.length > 0){
+    if(sa.type==="reward"){
+      rewWrap.style.display="block";
+      verdMsg.innerHTML=`<span style="color:var(--green);font-weight:900;">✦ ${sa.score}% Tasks Yesterday — System Rewards You!</span>`;
+      sa.items.forEach((r,idx)=>{
+        const claimed = sa.claimed && sa.claimed.includes(idx);
+        const div = document.createElement("div");
+        div.className="rcard"+(claimed?" locked":"");
+        div.innerHTML=`<div class="rcard-head">
+          <div class="rcard-ico">${r.e||"🎁"}</div>
+          <div class="rcard-info">
+            <div class="rcard-name">${r.name}</div>
+            <div class="rcard-desc">${r.desc}</div>
+            <span class="rbadge">+${r.hp} Hp</span>
+            ${r.cost>0?`<span class="rbadge">₹${r.cost} From Capital</span>`:""}
+            ${claimed?`<span class="rbadge">✓ Claimed</span>`:""}
+          </div></div>
+          ${!claimed?`<button class="btn b-green" onclick="claimSysReward(${idx});R(event,this);P(event,'#10b981')">✦ Claim Reward</button>`
+          :`<button class="btn" style="background:rgba(255,255,255,.04);color:rgba(255,255,255,.2);cursor:default;" disabled>✓ Already Claimed</button>`}`;
+        rewList.appendChild(div);
+      });
+    } else {
+      penWrap.style.display="block";
+      verdMsg.innerHTML=`<span style="color:var(--red);font-weight:900;">✗ ${sa.score}% Tasks Yesterday — System Punishes You.</span>`;
+      sa.items.forEach((p,idx)=>{
+        const endured = sa.endured && sa.endured.includes(idx);
+        const div = document.createElement("div");
+        div.className="pcard";
+        div.innerHTML=`<div class="pcard-head">
+          <div class="pcard-ico">${p.e||"⚡"}</div>
+          <div class="pcard-info">
+            <div class="pcard-name">${p.name}</div>
+            <div class="pcard-desc">${p.desc}</div>
+            <span class="pbadge">${p.hp} Hp</span>
+            ${endured?`<span class="pbadge" style="background:rgba(16,185,129,.1);color:var(--green);border-color:rgba(16,185,129,.2);">✓ Endured</span>`:""}
+          </div></div>
+          ${!endured?`<button class="btn b-red" onclick="endureSysPenalty(${idx});R(event,this);P(event,'#ff003c')">⚔ Endure Penalty</button>`
+          :`<button class="btn" style="background:rgba(255,255,255,.04);color:rgba(255,255,255,.2);cursor:default;" disabled>✓ Already Endured</button>`}`;
+        penList.appendChild(div);
+      });
+    }
+  } else {
+    const sr = getSR();
+    if(sr>80){
+      verdMsg.innerHTML=`<span style="color:var(--green);font-weight:900;">✦ ${sr}% Today — Keep Going! Reward Awaits At Midnight.</span>`;
+    } else if(sr>0){
+      verdMsg.innerHTML=`<span style="color:var(--red);font-weight:900;">⚠ ${sr}% Today — Push Past 80% Or Face Midnight Penalty.</span>`;
+    } else {
+      verdMsg.innerHTML=`<span style="color:rgba(255,255,255,.4);font-weight:800;">Add Tasks And Complete Them. System Judges At Midnight.</span>`;
+    }
+  }
+
+  // ── VITALS ────────────────────────────────────────────
+  document.getElementById("water-disp").textContent="Logged: "+ST.water+"L / 3L";
+  document.getElementById("sleep-disp").textContent="Logged: "+ST.sleep+"H / 8H";
+}
+
+// ════════════════════════════════════════════════════════
+// WATER / SLEEP
+// ════════════════════════════════════════════════════════
+function logWater(){
+  const v=parseFloat(document.getElementById("water-inp").value)||0;
+  const prev=ST.water;ST.water=v;save();
+  document.getElementById("water-disp").textContent="Logged: "+v+"L / 3L";
+  if(v>=3&&prev<3){changeHP(10);showModal("Water Goal 💧","3L Logged. +10 Hp. System Hydrated.");}
+}
+function logSleep(){
+  const v=parseFloat(document.getElementById("sleep-inp").value)||0;
+  const prev=ST.sleep;ST.sleep=v;save();
+  document.getElementById("sleep-disp").textContent="Logged: "+v+"H / 8H";
+  if(v>=8&&prev<8){changeHP(10);showModal("Sleep Goal 😴","8H Logged. +10 Hp. Recovery Complete.");}
+}
+
+// ════════════════════════════════════════════════════════
+// IRON FORGE
+// ════════════════════════════════════════════════════════
+function getSplit(){const diff=dayjs().diff(dayjs(ST.cycleStart),"day");return WORKOUTS[diff%4];}
+function renderIronForge(){
+  const sp=getSplit();
+  document.getElementById("split-name").textContent=sp.name;
+  const exs=document.getElementById("workout-exs");exs.innerHTML="";
+  if(!sp.exs.length){exs.innerHTML='<div style="color:rgba(255,255,255,.3);font-size:12px;font-weight:800;padding:8px 0;">Rest Day — Recovery Is Part Of The Protocol.</div>';}
+  else sp.exs.forEach(e=>{exs.innerHTML+=`<div class="excard"><div class="exname">${e.n}</div><div class="exsets">${e.s}</div></div>`;});
+  const ml=document.getElementById("meal-list");ml.innerHTML="";
+  MEALS.forEach(m=>{
+    const done=ST.mealsDone.includes(m.key);
+    const d=document.createElement("div");d.className="mcard"+(done?" mdone":"");
+    d.innerHTML=`<div class="mico">${m.ico}</div><div class="minfo"><div class="mname">${m.name}</div><div class="mdet">${m.det}</div></div><input type="checkbox" class="mcb" ${done?"checked":""} onchange="toggleMeal('${m.key}')"/>`;
+    ml.appendChild(d);
+  });
+  const last=ST.weightLog.length?ST.weightLog[ST.weightLog.length-1]:null;
+  document.getElementById("last-wt").textContent=last?"Last: "+last.w+"Kg On "+last.d:"Last Logged: —";
+
+  // Workout status UI — disable buttons after logging
+  var statusMsg=document.getElementById("workout-status-msg");
+  var btnWrap=document.getElementById("workout-btn-wrap");
+  var sp2=getSplit();
+  if(sp2.name==="Rest Day"){
+    if(statusMsg){statusMsg.style.display="block";statusMsg.style.background="rgba(0,136,255,.08)";statusMsg.style.border="1px solid rgba(0,136,255,.25)";statusMsg.style.color="var(--cyan)";statusMsg.textContent="Rest Day — Recovery Is Mandatory. No Workout Required Today.";}
+    if(btnWrap)btnWrap.style.display="none";
+  } else if(ST.workoutToday==="done"){
+    if(statusMsg){statusMsg.style.display="block";statusMsg.style.background="rgba(16,185,129,.08)";statusMsg.style.border="1px solid rgba(16,185,129,.3)";statusMsg.style.color="var(--green)";statusMsg.textContent="✓ Workout Completed Today. +50 Hp Earned. Come Back Tomorrow.";}
+    if(btnWrap)btnWrap.style.display="none";
+  } else if(ST.workoutToday==="missed"){
+    if(statusMsg){statusMsg.style.display="block";statusMsg.style.background="rgba(255,0,60,.08)";statusMsg.style.border="1px solid rgba(255,0,60,.3)";statusMsg.style.color="var(--red)";statusMsg.textContent="✗ Workout Logged As Missed Today. -50 Hp Deducted.";}
+    if(btnWrap)btnWrap.style.display="none";
+  } else {
+    if(statusMsg)statusMsg.style.display="none";
+    if(btnWrap)btnWrap.style.display="block";
+  }
+}
+function toggleMeal(key){
+  const i=ST.mealsDone.indexOf(key);
+  if(i===-1){ST.mealsDone.push(key);changeHP(5);ST.weeklyData.meals=(ST.weeklyData.meals||0)+1;}
+  else{ST.mealsDone.splice(i,1);changeHP(-5);ST.weeklyData.meals=Math.max(0,(ST.weeklyData.meals||0)-1);}
+  save();renderIronForge();
+}
+function workoutDone(){
+  if(ST.workoutToday){showModal("Already Logged","You Already Logged Today's Workout. One Per Day.");return;}
+  
+  ST.workoutToday="done";ST.weeklyData.workouts=(ST.weeklyData.workouts||0)+1;save();
+  trigRew(function(){changeHP(50);});
+  renderIronForge();
+  showModal("Workout Complete","Sam Conquered Today's Training. +50 Hp Added To The System.");
+}
+function workoutMissed(){
+  if(ST.workoutToday){showModal("Already Logged","You Already Logged Today's Workout Status. One Per Day.");return;}
+  
+  ST.workoutToday="missed";save();
+  trigPen(function(){changeHP(-50);});
+  renderIronForge();
+  showModal("Workout Missed","The System Does Not Forget. -50 Hp Deducted. Do Better Tomorrow.");
+}
+function logWeight(){
+  const v=parseFloat(document.getElementById("weigh-inp").value);
+  if(!v||v<30||v>250){showModal("Invalid","Please Enter A Valid Weight.");return;}
+  ST.weightLog.push({w:v,d:dayjs().format("MMM D")});
+  if(ST.weightLog.length>52)ST.weightLog.shift();
+  save();renderIronForge();renderCharts();document.getElementById("weigh-inp").value="";
+  showModal("Weight Logged ⚖️",v+"Kg Recorded. Keep Pushing Towards 75Kg, Sam.");
+}
+
+// ════════════════════════════════════════════════════════
+// REPORT CHARTS
+// ════════════════════════════════════════════════════════
+let cS=null,cW=null;
+function renderCharts(){
+  if(typeof Chart==="undefined"){setTimeout(renderCharts,400);return;}
+  // No panel guard — let chart render anytime it's called
+  var tickC="rgba(255,255,255,.22)";
+  var gridC="rgba(255,255,255,.04)";
+  var legC="rgba(255,255,255,.4)";
+
+  // SYNC CHART
+  var c1El=document.getElementById("sync-chart");
+  if(!c1El)return;
+  if(cS){try{cS.destroy();}catch(er){}cS=null;}
+  c1El.style.width="100%";c1El.style.height="160px";c1El.removeAttribute("height");
+  var raw=Array.isArray(ST.history30)?ST.history30:[];
+  var h30=raw.filter(function(h){return h&&h.date&&typeof h.score==="number";});
+  var sLabels=h30.length?h30.map(function(h){var p=h.date.split("-");return p[1]+"/"+p[2];}):["Today"];
+  var sData=h30.length?h30.map(function(h){return Math.max(0,Math.min(100,h.score));}):[getSR()];
+  try{
+    cS=new Chart(c1El,{type:"line",data:{labels:sLabels,datasets:[{label:"Sync Rate %",data:sData,borderColor:"#00e5ff",backgroundColor:"rgba(0,229,255,.08)",pointBackgroundColor:"#00e5ff",pointRadius:4,pointHoverRadius:6,tension:0.4,fill:true,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},plugins:{legend:{labels:{color:legC,font:{size:10}}},tooltip:{backgroundColor:"rgba(0,0,0,.85)",titleColor:"#00e5ff",bodyColor:"rgba(255,255,255,.7)"}},scales:{x:{ticks:{color:tickC,font:{size:9},maxRotation:45},grid:{color:gridC}},y:{min:0,max:100,ticks:{color:tickC,font:{size:9},callback:function(v){return v+"%";}},grid:{color:gridC}}}}});
+  }catch(er){console.warn("Sync chart:",er);}
+
+  // WEIGHT CHART
+  var c2El=document.getElementById("wt-chart");
+  if(!c2El)return;
+  if(cW){try{cW.destroy();}catch(er){}cW=null;}
+  c2El.style.width="100%";c2El.style.height="160px";c2El.removeAttribute("height");
+  var wLog=Array.isArray(ST.weightLog)?ST.weightLog:[];
+  var wL=wLog.length?wLog.map(function(w){return w.d;}):["Start"];
+  var wV=wLog.length?wLog.map(function(w){return Number(w.w)||58;}):[58];
+  var wT=wLog.length?wLog.map(function(){return 75;}):[75];
+  var minY=Math.max(50,Math.min.apply(null,wV)-2);
+  var maxY=Math.max(76,Math.max.apply(null,wV)+3);
+  try{
+    cW=new Chart(c2El,{type:"line",data:{labels:wL,datasets:[{label:"Sam (Kg)",data:wV,borderColor:"#0088ff",backgroundColor:"rgba(0,136,255,.08)",pointBackgroundColor:"#0088ff",pointRadius:4,pointHoverRadius:6,tension:0.4,fill:true,borderWidth:2},{label:"Target 75Kg",data:wT,borderColor:"rgba(251,191,36,.5)",backgroundColor:"transparent",borderDash:[6,4],pointRadius:0,borderWidth:1.5,fill:false}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},plugins:{legend:{labels:{color:legC,font:{size:10}}},tooltip:{backgroundColor:"rgba(0,0,0,.85)",titleColor:"#0088ff",bodyColor:"rgba(255,255,255,.7)"}},scales:{x:{ticks:{color:tickC,font:{size:9},maxRotation:45},grid:{color:gridC}},y:{min:minY,max:maxY,ticks:{color:tickC,font:{size:9},callback:function(v){return v+"Kg";}},grid:{color:gridC}}}}});
+  }catch(er){console.warn("Weight chart:",er);}
+
+  // PROGRESS BAR
+  var lw=wV[wV.length-1]||58;
+  var pct=Math.min(100,Math.max(0,((lw-58)/17)*100));
+  var fe=document.getElementById("wt-fill");
+  var le=document.getElementById("wt-lbl");
+  if(fe)fe.style.width=pct+"%";
+  if(le)le.textContent="Current: "+lw+"Kg";
+}
+// ════════════════════════════════════════════════════════
+// PROTOCOL
+// ════════════════════════════════════════════════════════
+function startProto(){
+  if(!ST.protocolStart){ST.protocolStart=dayjs().format("YYYY-MM-DD");save();document.getElementById("proto-btn").textContent="Protocol Active";}
+  renderProto();
+}
+function renderProto(){
+  const cont=document.getElementById("proto-days");cont.innerHTML="";
+  const start=ST.protocolStart?dayjs(ST.protocolStart):null;
+  for(let i=0;i<15;i++){
+    const ul=start&&dayjs().diff(start,"day")>=i,dn=ST.protocolDone.includes(i);
+    const div=document.createElement("div");div.className="pday"+(dn?" pdn":ul?" pul":"");
+    const _nc=dn?" dn":ul?" ul":"";const _tc=dn?"var(--green)":ul?"var(--gold)":"rgba(255,255,255,.18)";const _tt=ul||dn?PROTO_TASKS[i]:"Locked";
+    const _db=ul&&!dn?'<button class="btn b-gold btn-sm mt8" onclick="doneProto('+i+');R(event,this)">Done +10 Hp</button>':"";const _ck=dn?'<span style="color:var(--green);font-size:20px;flex-shrink:0;">&#10003;</span>':"";    
+    div.innerHTML='<div class="pdnum'+_nc+'">'+( i+1)+'</div><div style="flex:1;"><div class="pdtxt" style="color:'+_tc+';">'+_tt+'</div>'+_db+'</div>'+_ck;
+
+    cont.appendChild(div);
+  }
+}
+function doneProto(i){if(!ST.protocolDone.includes(i)){ST.protocolDone.push(i);save();trigRew(()=>changeHP(10));renderProto();}}
+
+// ════════════════════════════════════════════════════════
+// ASCEND
+// ════════════════════════════════════════════════════════
+function renderAscend(){
+  const gc=document.getElementById("glow-list");gc.innerHTML="";
+  GLOW_ITEMS.forEach((item,i)=>{
+    const dn=ST.glowChecks.includes(i);
+    const d=document.createElement("div");d.className="gli"+(dn?" gldone":"");
+    d.innerHTML=`<input type="checkbox" class="glcb" ${dn?"checked":""} onchange="toggleGlow(${i})"/><span class="gltxt">${item}</span>`;
+    gc.appendChild(d);
+  });
+  document.getElementById("glow-str").textContent=ST.glowStreak;
+  document.getElementById("glow-done").textContent=ST.glowChecks.length+"/"+GLOW_ITEMS.length;
+  const sam=document.getElementById("skin-am");sam.innerHTML="";
+  SKN_AM.forEach(s=>{sam.innerHTML+=`<div class="sstep"><div class="snum">${s.s}</div><div class="stxt">${s.t}</div></div>`;});
+  const spm=document.getElementById("skin-pm");spm.innerHTML="";
+  SKN_PM.forEach(s=>{spm.innerHTML+=`<div class="sstep"><div class="snum" style="background:#6c00ff">${s.s}</div><div class="stxt">${s.t}</div></div>`;});
+  const sty=document.getElementById("style-notes");sty.innerHTML="";
+  STYLE_NOTES.forEach(n=>{sty.innerHTML+=`<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;font-weight:800;color:rgba(255,255,255,.7);text-transform:capitalize;line-height:1.5;">${n}</div>`;});
+  if(ST.measurements){const m=ST.measurements;document.getElementById("meas-disp").innerHTML=`<div style="font-size:10px;font-weight:900;color:rgba(255,255,255,.28);margin-bottom:6px;">Last Saved: ${m.date}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"><div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.5);">Chest: <span style="color:var(--cyan);font-weight:900;">${m.chest||"—"}Cm</span></div><div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.5);">Arms: <span style="color:var(--cyan);font-weight:900;">${m.arms||"—"}Cm</span></div><div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.5);">Waist: <span style="color:var(--cyan);font-weight:900;">${m.waist||"—"}Cm</span></div><div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.5);">Shoulders: <span style="color:var(--cyan);font-weight:900;">${m.shoulders||"—"}Cm</span></div></div>`;}
+  renderCQ();
+}
+function toggleGlow(i){
+  const idx=ST.glowChecks.indexOf(i);
+  if(idx===-1){ST.glowChecks.push(i);changeHP(5);}
+  else{ST.glowChecks.splice(idx,1);changeHP(-5);}
+  save();renderAscend();
+}
+function saveMeas(){
+  ST.measurements={chest:document.getElementById("m-chest").value||null,arms:document.getElementById("m-arms").value||null,waist:document.getElementById("m-waist").value||null,shoulders:document.getElementById("m-shoulders").value||null,date:dayjs().format("MMM D YYYY")};
+  save();renderAscend();showModal("Saved ✓","Body Measurements Updated.");
+}
+function startCQ(){
+  if(!ST.cqStart){ST.cqStart=dayjs().format("YYYY-MM-DD");save();document.getElementById("cq-btn").textContent="Confidence Quest Active";}
+  renderCQ();
+}
+function renderCQ(){
+  const list=document.getElementById("cq-list");list.innerHTML="";
+  if(!ST.cqStart){list.innerHTML='<div style="color:rgba(255,255,255,.2);font-size:12px;font-weight:800;">Activate The Protocol Above To Begin.</div>';return;}
+  const dp=dayjs().diff(dayjs(ST.cqStart),"day");
+  document.getElementById("cq-btn").textContent="Active — Day "+(dp+1)+"/30";
+  for(let i=0;i<30;i++){
+    const ul=i<=dp,dn=ST.cqDone.includes(i);
+    const div=document.createElement("div");
+    div.className="cqd"+(dn?" cqdn":ul?" cqa":"");
+    div.innerHTML=`<div class="cqnum" style="background:${dn?"rgba(16,185,129,.15)":ul?"rgba(168,85,247,.15)":"rgba(255,255,255,.04)"};color:${dn?"var(--green)":ul?"var(--purple)":"rgba(255,255,255,.2)"};">${i+1}</div>
+      <span class="cqtxt" style="color:${dn?"rgba(255,255,255,.4)":ul?"rgba(255,255,255,.82)":"rgba(255,255,255,.18)"};">${ul||dn?CQ_TASKS[i]:"Locked"}</span>
+      ${ul&&!dn?`<button class="btn b-purple btn-sm" style="flex-shrink:0;margin-left:8px;" onclick="doneCQ(${i});R(event,this)">+10</button>`:""}
+      ${dn?`<span style="color:var(--green);font-size:16px;flex-shrink:0;margin-left:6px;">✓</span>`:""}`;
+    list.appendChild(div);
+  }
+}
+function doneCQ(i){if(!ST.cqDone.includes(i)){ST.cqDone.push(i);save();trigRew(()=>changeHP(10));renderCQ();}}
+
+// ════════════════════════════════════════════════════════
+// CAPITAL
+// ════════════════════════════════════════════════════════
+function addLedger(type,amt,tag){ST.ledger.push({type,amt,tag:toTC(tag),date:dayjs().format("MMM D HH:mm")});}
+function doDeposit(){
+  const amt=parseFloat(document.getElementById("dep-amt").value)||0;
+  const tag=document.getElementById("dep-tag").value.trim()||"Deposit";
+  if(amt<=0){showModal("Invalid","Enter A Valid Amount.");return;}
+  ST.capital+=amt;addLedger("deposit",amt,tag);save();renderCapital();
+  document.getElementById("dep-amt").value="";document.getElementById("dep-tag").value="";
+  showModal("Deposited ✓","₹"+amt.toLocaleString("en-IN")+" Added To Capital.");
+}
+function doDeduct(){
+  const amt=parseFloat(document.getElementById("ded-amt").value)||0;
+  const tag=document.getElementById("ded-tag").value.trim()||"Deduction";
+  if(amt<=0){showModal("Invalid","Enter A Valid Amount.");return;}
+  if(amt>ST.capital){showModal("Insufficient","Not Enough Capital.");return;}
+  ST.capital-=amt;addLedger("deduct",amt,tag);save();renderCapital();
+  document.getElementById("ded-amt").value="";document.getElementById("ded-tag").value="";
+}
+function renderCapital(){
+  document.getElementById("cap-disp").textContent="₹"+ST.capital.toLocaleString("en-IN");
+  const h=document.getElementById("ledger");
+  if(!ST.ledger.length){h.innerHTML='<div style="color:rgba(255,255,255,.18);font-size:13px;font-weight:800;padding:14px 0;">No Transactions Yet</div>';return;}
+  h.innerHTML=ST.ledger.slice().reverse().map(l=>`<div class="lrow"><span class="ldate">${l.date}</span><span class="ltag">${l.tag}</span><span class="lamp ${l.type==="deposit"?"l-plus":"l-minus"}">${l.type==="deposit"?"+":"-"}₹${l.amt.toLocaleString("en-IN")}</span></div>`).join("");
+}
+
+// ════════════════════════════════════════════════════════
+// DUNGEONS
+// ════════════════════════════════════════════════════════
+function addDung(){
+  const name=document.getElementById("dng-name").value.trim();
+  const d=parseInt(document.getElementById("dng-d").value)||0;
+  const h=parseInt(document.getElementById("dng-h").value)||0;
+  const m=parseInt(document.getElementById("dng-m").value)||0;
+  if(!name){showModal("Error","Please Enter A Dungeon Name.");return;}
+  const ms=((d*24*60)+(h*60)+m)*60000;
+  if(!ms){showModal("Error","Please Set A Valid Time.");return;}
+  ST.dungeons.push({id:Date.now(),name:toTC(name),endsAt:Date.now()+ms,claimed:false,expired:false});
+  save();renderDungs();
+  document.getElementById("dng-name").value="";document.getElementById("dng-d").value="";document.getElementById("dng-h").value="";document.getElementById("dng-m").value="";
+}
+function claimDung(id){
+  const d=ST.dungeons.find(d=>d.id===id);if(!d||d.claimed||d.expired)return;
+  d.claimed=true;ST.weeklyData.dungeons=(ST.weeklyData.dungeons||0)+1;save();
+  trigRew(()=>changeHP(50));renderDungs();showModal("Dungeon Cleared 🏆","Sam Has Conquered The Dungeon. +50 Hp Awarded.");
+}
+function delDung(id){ST.dungeons=ST.dungeons.filter(d=>d.id!==id);save();renderDungs();}
+function fmtMs(ms){if(ms<=0)return"00:00:00";const s=Math.floor(ms/1000),d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),sc=s%60;return d>0?d+"D "+p2(h)+"H "+p2(m)+"M":p2(h)+":"+p2(m)+":"+p2(sc);}
+function p2(n){return String(n).padStart(2,"0");}
+function renderDungs(){
+  const list=document.getElementById("dung-list");list.innerHTML="";
+  if(!ST.dungeons.length){list.innerHTML='<div style="text-align:center;color:rgba(255,255,255,.18);font-size:13px;font-weight:800;padding:18px 0;">No Active Dungeons</div>';return;}
+  ST.dungeons.forEach(d=>{
+    const rem=d.endsAt-Date.now(),exp=rem<=0;
+    if(exp&&!d.expired&&!d.claimed){d.expired=true;save();trigPen(()=>changeHP(-50));showModal("Dungeon Failed!","\""+d.name+"\" Has Expired. -50 Hp.");}
+    const div=document.createElement("div");div.className="dcard";
+    const _timerCls=exp?" exp":"";const _timerTxt=exp?"&#10007; Expired":fmtMs(rem);
+    const _claimBtn=!d.claimed&&!d.expired?'<button class="btn b-green mb8" onclick="claimDung('+d.id+');R(event,this);P(event,\'#10b981\')">&#10022; Claim Victory +50 Hp</button>':"";    const _claimedDiv=d.claimed?'<div style="color:var(--green);font-size:12px;font-weight:900;margin-bottom:8px;">&#10003; Claimed</div>':"";    const _failDiv=d.expired&&!d.claimed?'<div style="color:var(--red);font-size:12px;font-weight:900;margin-bottom:8px;">&#10007; Failed - Penalty Applied</div>':"";    
+    div.innerHTML='<div class="dname">'+d.name+'</div><div class="dtimer'+_timerCls+'">'+_timerTxt+'</div>'+_claimBtn+_claimedDiv+_failDiv+'<button class="btn b-red btn-sm" onclick="delDung('+d.id+');R(event,this)">Remove</button>';
+
+
+    list.appendChild(div);
+  });
+}
+setInterval(renderDungs,1000);
+
+// ════════════════════════════════════════════════════════
+// SYS — Custom + Purge
+// ════════════════════════════════════════════════════════
+function addCR(){
+  const e=document.getElementById("cr-emoji").value.trim()||"⭐";
+  const name=document.getElementById("cr-name").value.trim();
+  const desc=document.getElementById("cr-desc").value.trim();
+  const hp=parseInt(document.getElementById("cr-hp").value)||25;
+  const cost=parseInt(document.getElementById("cr-cost").value)||0;
+  if(!name){showModal("Missing","Please Enter A Reward Name.");return;}
+  ST.customRewards.push({id:"cr_"+Date.now(),e,name:toTC(name),desc:toTC(desc)||"Custom Reward.",hp,cost});
+  save();renderKarma();
+  ["cr-emoji","cr-name","cr-desc","cr-hp","cr-cost"].forEach(id=>document.getElementById(id).value="");
+  showModal("Added ✓",e+" "+toTC(name)+" Added To Reward Arsenal.");
+}
+function addCP(){
+  const e=document.getElementById("cp-emoji").value.trim()||"⚡";
+  const name=document.getElementById("cp-name").value.trim();
+  const desc=document.getElementById("cp-desc").value.trim();
+  const hp=parseInt(document.getElementById("cp-hp").value)||25;
+  if(!name){showModal("Missing","Please Enter A Penalty Name.");return;}
+  ST.customPenalties.push({id:"cp_"+Date.now(),e,name:toTC(name),desc:toTC(desc)||"Custom Penalty.",hp:-Math.abs(hp),drill:[desc||"Execute The Penalty."]});
+  save();renderKarma();
+  ["cp-emoji","cp-name","cp-desc","cp-hp"].forEach(id=>document.getElementById(id).value="");
+  showModal("Added ✓",e+" "+toTC(name)+" Added To Penalty Vault.");
+}
+function delCR(id){ST.customRewards=ST.customRewards.filter(r=>r.id!==id);save();renderKarma();}
+function delCP(id){ST.customPenalties=ST.customPenalties.filter(p=>p.id!==id);save();renderKarma();}
+function enableNotifs(){
+  if(!("Notification" in window)){
+    showModal("Not Supported","Push Notifications Require A Web Server. Use A Browser Extension Like 'Web Server for Chrome' Or Host On Localhost.");
+    return;
+  }
+  Notification.requestPermission().then(function(p){
+    if(p==="granted"){ST.notifOn=true;save();showModal("Enabled","System Will Alert Sam When Quests Are Pending.");}
+    else showModal("Denied","Allow Notifications In Browser Settings First.");
+  });
+}
+function exportJSON(){
+  const data={};Object.keys(localStorage).filter(k=>k.startsWith(NS)).forEach(k=>{data[k]=localStorage.getItem(k);});
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+  a.download="monarch_sam_v5_"+dayjs().format("YYYY-MM-DD")+".json";a.click();
+}
+function importJSON(){
+  const inp=document.createElement("input");inp.type="file";inp.accept=".json";
+  inp.onchange=e=>{const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);Object.keys(d).forEach(k=>localStorage.setItem(k,d[k]));showModal("Success ✓","Data Restored. Please Refresh.");}catch{showModal("Failed","Invalid Backup File.");}};r.readAsText(e.target.files[0]);};inp.click();
+}
+async function doPurge(){
+  const txt=document.getElementById("purge-txt").value.trim();
+  const wc=txt.split(/\s+/).filter(w=>w).length;
+  if(wc<50){showModal("Insufficient",wc+"/50 Words. Write More.");return;}
+  const res=await showModal("Confirm Purge","Delete ALL Of Sam's Data? Cannot Be Undone.",false,"",true);
+  if(!res.ok)return;
+  Object.keys(localStorage).filter(k=>k.startsWith(NS)).forEach(k=>localStorage.removeItem(k));
+  showModal("Purged","All Data Erased. Refreshing...");setTimeout(()=>location.reload(),2000);
+}
+document.getElementById("purge-txt").addEventListener("input",function(){
+  const wc=this.value.trim().split(/\s+/).filter(w=>w).length;
+  const el=document.getElementById("purge-wc");el.textContent=wc+" / 50 Words";el.style.color=wc>=50?"var(--green)":"rgba(255,255,255,.25)";
+});
+
+// ════════════════════════════════════════════════════════
+// SCREEN TIMER
+// ════════════════════════════════════════════════════════
+function startScrTimer(){
+  const el=document.getElementById("scr-timer"),val=document.getElementById("scr-val");
+  el.classList.add("show");
+  const iv=setInterval(()=>{
+    const rem=ST.scrTimerEnd-Date.now();
+    if(rem<=0){el.classList.remove("show");clearInterval(iv);ST.scrTimerEnd=null;save();return;}
+    val.textContent=p2(Math.floor(rem/3600000))+":"+p2(Math.floor((rem%3600000)/60000))+":"+p2(Math.floor((rem%60000)/1000));
+  },1000);
+}
+
+// ════════════════════════════════════════════════════════
+// SYSTEM SUMMARY
+// ════════════════════════════════════════════════════════
+function showSummary(){
+  const lw=ST.weightLog.length?ST.weightLog[ST.weightLog.length-1].w:58;
+  const sp=getSplit();
+
+  // Last night 80% result row
+  let nightRow="";
+  if(ST.lastNightResult){
+    const n=ST.lastNightResult;
+    const isR=n.type==="reward";
+    const col=isR?"var(--green)":"var(--red)";
+    const hpTxt=isR?"+"+n.hp+"Hp":n.hp+"Hp";
+    const _bc=isR?"rgba(16,185,129,.25)":"rgba(255,0,60,.25)";const _bg=isR?"rgba(16,185,129,.07)":"rgba(255,0,60,.07)";const _type=isR?"Reward":"Penalty";const _ev=isR?"Earned":"Penalty";
+    nightRow='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;margin-bottom:8px;border:1px solid '+_bc+';background:'+_bg+';">'+'<span style="font-size:11px;font-weight:900;color:'+col+';text-transform:capitalize;">'+n.emoji+' Last Night '+_type+'<br><span style="font-size:9px;font-weight:800;opacity:.7;">'+n.score+'% Tasks - '+_ev+'</span></span>'+'<span style="font-size:12px;font-weight:900;color:'+col+';font-family:Share Tech Mono,monospace;">'+n.name+'<br><span style="color:'+col+';opacity:.8;">'+hpTxt+'</span></span></div>';
+
+
+  }
+
+  const rows=[
+    {k:"Hunter",v:"Sam"},{k:"Level",v:""+ST.level},{k:"Hp",v:ST.hp+"/"+ST.maxHp},
+    {k:"Pending Quests",v:""+ST.tasks.filter(t=>!t.done).length},
+    {k:"Active Dungeons",v:""+ST.dungeons.filter(d=>!d.claimed&&!d.expired).length},
+    {k:"Today's Workout",v:sp.name},{k:"Meals Done",v:ST.mealsDone.length+"/4"},
+    {k:"Weight Progress",v:lw+"Kg / 75Kg"},
+    {k:"Glow Streak",v:ST.glowStreak+" Days"},
+    {k:"Sync Rate",v:getSR()+"%"}
+  ];
+  document.getElementById("ss-rows").innerHTML=
+    nightRow+
+    rows.map(r=>`<div class="ssrow"><span class="sskey">${r.k}</span><span class="ssval">${r.v}</span></div>`).join("");
+  document.getElementById("ss-ov").classList.add("show");
+
+  // Trigger animation for last night result, clear after
+  if(ST.lastNightResult){
+    const isR=ST.lastNightResult.type==="reward";
+    setTimeout(()=>{
+      if(isR)trigRew(()=>{});
+      else trigPen(()=>{});
+      ST.lastNightResult=null;save();
+    },900);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// WEEKLY DEBRIEF
+// ════════════════════════════════════════════════════════
+function checkDebrief(){
+  if(dayjs().day()!==0)return;
+  const wk=dayjs().format("YYYY-[W]ww");
+  if(ST.lastDebrief===wk)return;
+  ST.lastDebrief=wk;save();
+  const w=ST.weeklyData;
+  const score=Math.round(((w.workouts||0)/3*30)+(Math.round(((w.meals||0)/28)*100)*.4));
+  const verd=score>70?{t:"◈ Ascending ◈",c:"var(--green)"}:score>=40?{t:"◈ Stagnating ◈",c:"var(--gold)"}:{t:"◈ Decaying ◈",c:"var(--red)"};
+  document.getElementById("db-rows").innerHTML=[{k:"Workouts",v:(w.workouts||0)+"/3"},{k:"Meals Hit",v:(w.meals||0)+"/28"},{k:"Dungeons Cleared",v:""+(w.dungeons||0)},{k:"Net Hp",v:((w.hpChange||0)>=0?"+":"")+(w.hpChange||0)}].map(r=>`<div class="ssrow"><span class="sskey">${r.k}</span><span class="ssval">${r.v}</span></div>`).join("");
+  const vel=document.getElementById("db-verdict");vel.style.color=verd.c;vel.textContent=verd.t;
+  document.getElementById("debrief-ov").classList.add("show");
+  ST.weeklyData={workouts:0,meals:0,dungeons:0,hpChange:0};save();
+}
+
+// ════════════════════════════════════════════════════════
+// POSTURE REMINDER
+// ════════════════════════════════════════════════════════
+setInterval(()=>{
+  const el=document.getElementById("posture-ov");el.classList.add("show");drawPostureC();
+  setTimeout(()=>el.classList.remove("show"),5000);
+},2*60*60*1000);
+
+// ════════════════════════════════════════════════════════
+// BANNERS
+// ════════════════════════════════════════════════════════
+function checkBanners(){
+  const today=dayjs().format("YYYY-MM-DD");
+  if(ST.noMobileDay===today)document.getElementById("ban-nomobile").classList.add("show");
+  if(ST.noSocialDay===today)document.getElementById("ban-nosocial").classList.add("show");
+  if(ST.musicActive)document.getElementById("music-ban").classList.add("show");
+  // travel
+  const tb=document.getElementById("travel-banner");const tm=document.getElementById("travel-msg");
+  if(isFri()){tb.classList.add("show");tm.textContent="Friday: Pack Your Bag, Sam. Sunday Is Your Adventure Day.";}
+  else if(isSun()){tb.classList.add("show");tm.textContent="GO OUT TODAY, SAM! Adventure Awaits. Don't Waste This Sunday.";}
+  // screen timer
+  if(ST.scrTimerEnd&&ST.scrTimerEnd>Date.now())startScrTimer();else{ST.scrTimerEnd=null;save();}
+}
+
+// ════════════════════════════════════════════════════════
+// PUSH NOTIF
+// ════════════════════════════════════════════════════════
+function fireNotif(){
+  if(!ST.notifOn||Notification.permission!=="granted")return;
+  const pend=ST.tasks.filter(t=>!t.done).length;
+  if(pend>0)new Notification("Monarch Zephyr — Hunter: Sam",{body:pend+" Quest"+(pend>1?"s":"")+" Pending. Execute The Protocol."});
+}
+
+// ════════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════════
+function goTab(tab,btn){
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("act"));
+  document.querySelectorAll(".tb").forEach(b=>b.classList.remove("act"));
+  document.getElementById("panel-"+tab).classList.add("act");
+  btn.classList.add("act");btn.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+  if(tab==="report"){setTimeout(renderCharts,150);}
+  if(tab==="ironforge")renderIronForge();
+  if(tab==="ascend")renderAscend();
+  if(tab==="karma")renderKarma();
+  if(tab==="capital")renderCapital();
+  if(tab==="protocol")renderProto();
+  if(tab==="oracle")runOracle();
+}
+
+// ════════════════════════════════════════════════════════
+// DAILY END REPORT — Diary Style
+// ════════════════════════════════════════════════════════
+let _reportData=null;
+
+function getMoralStory(score,doneTasks,missedTasks,workoutDone,mealsHit){
+  var doneNames=doneTasks.map(function(t){return t.text;}).join(", ")||"nothing";
+  var missNames=missedTasks.map(function(t){return t.text;}).join(", ")||"nothing";
+  var doneLen=doneTasks.length;
+  var missLen=missedTasks.length;
+  var rng=Math.floor(Math.random()*4); // 4 variants per tier
+
+  // ── 100% FLAWLESS ────────────────────────────────
+  if(score===100){
+    var s100=[
+      "FLAWLESS. Every single quest fell before you today, Sam. "+doneLen+" for "+doneLen+". The system witnessed perfection — not because you felt like it, but because you executed anyway. This is what the shadow monarch looks like before the throne. Don't let tomorrow be the day the streak dies. You know what this standard feels like now. That's dangerous. Keep it.",
+      "100%. The system is silent because there is nothing to critique. Every task completed. Not skipped, not deferred — DONE. You are becoming the person future Sam will thank. Tonight you rest as a winner. Tomorrow you wake as a hunter who knows what full execution tastes like. Do not forget this feeling.",
+      "Perfect sync rate. "+doneLen+" quests. "+doneLen+" victories. Sam operated at maximum capacity today. While others made excuses, you made progress. While others scrolled, you executed. This single day compounds into weeks, into months, into a completely different life. Protect this standard like it's the most valuable thing you own — because it is.",
+      "I have nothing bad to say. Zero. The system logged "+doneLen+" completed tasks and not one left behind. This is the version of you that scares mediocrity. On your worst future days, remember how today felt. Come back to this entry. Read it. Remember that Sam is capable of flawless. Now go sleep like a champion."
+    ];
+    return s100[rng];
+  }
+
+  // ── 80–99% STRONG ────────────────────────────────
+  if(score>=80){
+    var suf=missLen>1?"s were":"was";
+    var s80=[
+      "Strong day, Sam. "+score+"% — "+doneLen+" quests conquered. The reward tonight is earned and deserved. But "+missLen+" quest"+suf+" abandoned: "+missNames+". The system doesn't forget those. Tomorrow morning, those tasks go first. Before social media, before comfort — those. Almost perfect is not perfect. A hunter who finishes 80% of a raid still takes damage from the 20% he ignored.",
+      score+"% puts you above the average human by miles. "+doneLen+" tasks done. But let's be real — "+missNames+" was left. That wasn't lack of ability. That was a choice. You chose comfort over those specific tasks. Own that. Tomorrow, those go on the list first and get done first. Strong days are built into great days one missed task at a time.",
+      ""+doneLen+" out of "+(doneLen+missLen)+" — "+score+"%. Reward unlocked, Sam. You earned it. But the "+missLen+" incomplete quest"+suf+" ("+missNames+") will carry over as weight. The system rewards execution AND reminds you of gaps. Close those gaps tomorrow. A chain with one weak link still breaks.",
+      "Good. Not great. "+score+"% means "+missLen+" quest"+suf+" left unfinished: "+missNames+". The fact that you got "+score+"% means you had the energy and time. Something else took priority. Was it worth more than your goals? Evaluate that tonight. Claim your reward — you earned it. But set an alarm for those missed tasks tomorrow."
+    ];
+    return s80[rng];
+  }
+
+  // ── 50–79% MEDIOCRE ──────────────────────────────
+  if(score>=50){
+    var s50=[
+      "Mediocre, Sam. "+score+"%. You completed: "+doneNames+". You abandoned: "+missNames+". The gap between the Sam you are and the Sam you want to be lives in those abandoned quests. Comfort won more battles than discipline today. The gate doesn't care if you were tired. It doesn't negotiate. Tomorrow, you negotiate less with yourself.",
+      score+"% is not a failure — but it's not a hunter's performance. "+doneLen+" done, "+missLen+" untouched. "+missNames+" got left behind. You know why. The system knows why. Stop pretending the 'right time' is coming. The right time was this morning. Tomorrow the right time is when you wake up. Not after breakfast. Not after scrolling. When you wake up.",
+      "Half measures, Sam. "+score+"%. Fifty-plus percent means you started strong and faded — or you picked easy tasks and avoided hard ones. Which was it? "+missNames+" didn't complete itself. Those specific things you avoided are exactly where your growth is hiding. Tomorrow: do the hard one first. The one you dread. That one specifically.",
+      ""+score+"%. The system is unimpressed but not giving up on you. "+doneLen+" quests done is not nothing. But "+missNames+" sits incomplete. The penalty tonight is fair — you didn't fully execute. Tomorrow is a clean slate. No carrying today's excuses. No 'I'll make up for it.' Just a new list and a decision to go harder from 6AM."
+    ];
+    return s50[rng];
+  }
+
+  // ── 1–49% WEAK ───────────────────────────────────
+  if(score>0){
+    var suf2=doneLen>1?"s":"";
+    var sw=[
+      "Weak, Sam. "+score+"%. Only "+doneLen+" task"+suf2+" completed out of "+(doneLen+missLen)+". "+missNames+" — those weren't hard to do. You chose not to do them. The system doesn't feel sorry for you and neither should you. Self-pity and penalty both knock on the same door at "+score+"%. Tonight reflects hard. Tomorrow the hunter who wants 75kg, better skin, and a better life shows up at dawn — not at noon after scrolling.",
+      score+"% is a penalty tier. Plain and simple. "+doneLen+" done, "+missLen+" ignored. "+missNames+" sat on the list all day while you did other things. None of those other things were your goals. Your body is still 58kg. Your face rating is still 4/10. Your bank still shows what it shows. Those numbers only change when Sam executes. Not when Sam feels ready.",
+      "The system logged "+doneLen+" completed quest"+suf2+" and "+missLen+" abandoned ones today. "+missNames+" went untouched. This is the kind of day that, compounded over weeks, explains why people stay exactly where they started. You have goals. You have the app. You have the plan. What you used today was the snooze button and the scroll reflex. Tomorrow: zero tolerance.",
+      ""+score+"% — Sam, this is not the level of someone becoming a baddie. This is the level of someone staying average. "+doneLen+" tasks done out of "+(doneLen+missLen)+". "+missNames+" ignored. The penalty you receive tonight is the mildest version of what life charges for this pattern over months. Wake up tomorrow like your goals are on fire. Because they are."
+    ];
+    return sw[rng];
+  }
+
+  // ── 0% ZERO ──────────────────────────────────────
+  var s0=[
+    "Zero. Absolute zero, Sam. Not one quest touched. "+missLen+" tasks sat on the list all day untouched — "+missNames+". The shadow monarch did not build his army by resting. Sung Jin-Woo got up from death itself to keep moving. You had tasks that required walking across a room and chose not to. Tomorrow is not guaranteed. If it comes, the first task gets done before you touch your phone. No negotiation. No excuses. Arise.",
+    "The system logged nothing today. Zero percent. "+missLen+" quests abandoned before they started: "+missNames+". You know what's interesting? Every warrior, every hunter, every legend you admire — they all have bad days. The difference is they show up the next day with more aggression, not more excuses. Tomorrow you wake up with something to prove. To yourself. Not to anyone else.",
+    "0%. The harshest entry in the diary. "+missLen+" tasks. Zero done. I won't pretend this doesn't matter — it does. Every zero day is a vote against the Sam who wants 75kg, a 7/10 face, a better life. Naruto never had a zero day. Goku never had a zero day. Even on his worst training days, something got done. Tomorrow: one task first thing. Then another. Build from nothing like a shadow soldier rising.",
+    "Nothing done. The list had "+missLen+" items. "+missNames+". All of them sat there while the day passed. The version of you reading this knows exactly why it happened and knows it wasn't worth it. Tomorrow is a choice. A real one. Not a promise — a choice made at 6AM when the alarm goes off and every comfortable instinct says stay down. The hunter who rises is the one who becomes unrecognizable in 6 months."
+  ];
+  return s0[rng];
+}
+
+function showDailyReport(){
+  const score=getSR();
+  const done=ST.tasks.filter(t=>t.done);
+  const missed=ST.tasks.filter(t=>!t.done);
+  const total=ST.tasks.length;
+  const sp=getSplit();
+  const workoutLogged=ST.weeklyData&&ST.weeklyData.workouts>0;
+  const mealsHit=ST.mealsDone.length;
+  const now=dayjs();
+
+  // Build report
+  document.getElementById("rpt-date").textContent=now.format("MMMM D, YYYY");
+  document.getElementById("rpt-day").textContent=now.format("dddd");
+
+  // Score + color
+  const col=score===100?"var(--green)":score>=80?"var(--cyan)":score>=50?"var(--gold)":score>0?"var(--red)":"#666";
+  const scoreEl=document.getElementById("rpt-score");
+  scoreEl.textContent=score+"%";scoreEl.style.color=col;
+
+  // Verdict
+  const verdicts=[
+    [100,"Flawless Execution ⚡","var(--green)"],
+    [80,"Strong Performance 💪","var(--cyan)"],
+    [50,"Mediocre Day 😑","var(--gold)"],
+    [1,"Weak Showing 🩸","var(--red)"],
+    [0,"Zero Execution 💀","#666"]
+  ];
+  const [,vt,vc]=verdicts.find(([thresh])=>score>=thresh)||verdicts[verdicts.length-1];
+  const verdEl=document.getElementById("rpt-verdict");
+  verdEl.textContent=vt;verdEl.style.color=vc;
+
+  // Tasks done
+  const doneEl=document.getElementById("rpt-done-list");
+  doneEl.innerHTML=done.length?done.map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(16,185,129,.08);font-size:12px;font-weight:800;color:rgba(255,255,255,.75);text-transform:capitalize;"><span style="color:var(--green);">✓</span>${t.text}</div>`).join(""):`<div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.25);padding:8px 0;">No Tasks Completed Today.</div>`;
+
+  // Tasks missed
+  const missEl=document.getElementById("rpt-miss-list");
+  missEl.innerHTML=missed.length?missed.map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,0,60,.08);font-size:12px;font-weight:800;color:rgba(255,255,255,.75);text-transform:capitalize;"><span style="color:var(--red);">✗</span>${t.text}</div>`).join(""):`<div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.25);padding:8px 0;">All Tasks Completed. Flawless.</div>`;
+
+  // Stats
+  const statsRows=[
+    {k:"Tasks",v:`${done.length} / ${total} Done`,c:col},
+    {k:"Meals",v:`${mealsHit} / 4 Hit`,c:mealsHit>=3?"var(--green)":"var(--gold)"},
+    {k:"Water",v:`${ST.water}L / 3L`,c:ST.water>=3?"var(--green)":"var(--red)"},
+    {k:"Sleep",v:`${ST.sleep}H / 8H`,c:ST.sleep>=8?"var(--green)":"var(--red)"},
+    {k:"Workout",v:sp.name==="Rest Day"?"Rest Day":workoutLogged?"Done ✓":"Not Logged",c:workoutLogged||sp.name==="Rest Day"?"var(--green)":"var(--red)"},
+    {k:"Glow Checks",v:`${ST.glowChecks.length} / 9`,c:ST.glowChecks.length>=7?"var(--green)":ST.glowChecks.length>=4?"var(--gold)":"var(--red)"},
+    {k:"Purity Streak",v:`${ST.purityStreak||0} Days Clean`,c:(ST.purityStreak||0)>=7?"var(--green)":"var(--cyan)"},
+    {k:"Current Hp",v:`${ST.hp} / ${ST.maxHp}`,c:"var(--cyan)"},
+    {k:"Level",v:`${ST.level}`,c:"var(--gold)"},
+  ];
+  document.getElementById("rpt-stats").innerHTML=statsRows.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);"><span style="font-size:11px;font-weight:800;color:rgba(255,255,255,.35);">${r.k}</span><span style="font-size:12px;font-weight:900;color:${r.c};font-family:'Share Tech Mono',monospace;">${r.v}</span></div>`).join("");
+
+  // Moral story
+  document.getElementById("rpt-story").textContent=getMoralStory(score,done,missed,workoutLogged,mealsHit);
+
+  // Store for copy
+  _reportData={score,done,missed,mealsHit,water:ST.water,sleep:ST.sleep,purity:ST.purityStreak||0,glowChecks:ST.glowChecks.length,verdict:vt,story:getMoralStory(score,done,missed,workoutLogged,mealsHit),date:now.format("MMMM D, YYYY"),day:now.format("dddd")};
+
+  // Show overlay
+  const ov=document.getElementById("report-ov");
+  ov.style.display="flex";
+  ov.scrollTop=0;
+}
+
+function closeReport(){
+  document.getElementById("report-ov").style.display="none";
+}
+
+function copyReport(){
+  if(!_reportData)return;
+  const d=_reportData;
+  const doneList=d.done.map(t=>"  ✓ "+t.text).join("\n")||"  (None)";
+  const missList=d.missed.map(t=>"  ✗ "+t.text).join("\n")||"  (All Done)";
+  const text=`━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📖 DIARY — ${d.day}, ${d.date}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SYNC RATE: ${d.score}%  |  ${d.verdict}
+
+✅ COMPLETED:
+${doneList}
+
+❌ MISSED:
+${missList}
+
+STATS:
+• Meals: ${d.mealsHit}/4
+• Water: ${d.water}L
+• Sleep: ${d.sleep}H
+• Glow Checks: ${d.glowChecks}/9
+• Purity Streak: ${d.purity} Days
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SYSTEM'S WORD FOR SAM:
+
+${d.story}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+
+  // Safe clipboard for file:// protocol
+  try{
+    if(navigator.clipboard&&window.isSecureContext){
+      navigator.clipboard.writeText(text).then(function(){
+        showModal("Copied","Report Copied To Clipboard. Paste It In Your Diary, Sam.");
+      });
+    } else {
+      // Fallback: use textarea + execCommand
+      var ta=document.createElement("textarea");
+      ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+      document.body.appendChild(ta);ta.focus();ta.select();
+      try{document.execCommand("copy");showModal("Copied","Report Copied. Paste In Your Diary.");}
+      catch(e){showModal("Copy Report","Press Ctrl+C to copy the report shown below.");}
+      document.body.removeChild(ta);
+    }
+  }catch(e){
+    showModal("Note","Could Not Auto-Copy. Please Screenshot The Report Instead.");
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// 10 PM AUTO REPORT TRIGGER
+// ════════════════════════════════════════════════════════
+function check10PMReport(){
+  const now=dayjs();
+  const h=now.hour(),m=now.minute();
+  // trigger at 22:00 (10 PM)
+  if(h===22&&m===0){
+    const key="report_shown_"+now.format("YYYY-MM-DD");
+    if(!localStorage.getItem(NS+key)){
+      localStorage.setItem(NS+key,"1");
+      showDailyReport();
+    }
+  }
+}
+setInterval(check10PMReport,60000);// check every minute
+
+// ════════════════════════════════════════════════════════
+// ORACLE — Offline AI Analysis System
+// ════════════════════════════════════════════════════════
+function getHunterRank(avgScore,streak,level){
+  // Based on 30-day avg sync + streak + level
+  const combined=(avgScore*.5)+(Math.min(streak,30)/30*25)+(Math.min(level,20)/20*25);
+  if(combined>=95)return{rank:"SSS",lbl:"Shadow Monarch",col:"#fbbf24"};
+  if(combined>=85)return{rank:"SS",lbl:"National Level Hunter",col:"#a855f7"};
+  if(combined>=75)return{rank:"S",lbl:"S-Rank Hunter",col:"#00e5ff"};
+  if(combined>=60)return{rank:"A",lbl:"A-Rank Hunter",col:"#10b981"};
+  if(combined>=45)return{rank:"B",lbl:"B-Rank Hunter",col:"#0088ff"};
+  if(combined>=30)return{rank:"C",lbl:"C-Rank Hunter",col:"#ffffff"};
+  if(combined>=15)return{rank:"D",lbl:"D-Rank Hunter",col:"rgba(255,255,255,.5)"};
+  return{rank:"E",lbl:"E-Rank Hunter (The Beginning)",col:"rgba(255,0,60,.7)"};
+}
+
+function oracleSection(title,col,items){
+  if(!items||!items.length)return"";
+  var html='<div class="gc mb12" style="border-color:'+col+'40;"><div class="st" style="color:'+col+';">'+title+'</div>';
+  items.forEach(function(item){
+    var ico=item.ico||item.i||"◈";
+    var ttl=item.title||item.t||"";
+    var det=item.detail||item.d||"";
+    html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);">'
+      +'<span style="font-size:18px;flex-shrink:0;line-height:1.4;">'+ico+'</span>'
+      +'<div><div style="font-size:12px;font-weight:900;color:rgba(255,255,255,.88);text-transform:capitalize;margin-bottom:3px;">'+ttl+'</div>'
+      +'<div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.42);line-height:1.6;">'+det+'</div></div></div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function runOracle(){
+  var h30=Array.isArray(ST.history30)?ST.history30.filter(function(h){return h&&typeof h.score==='number';}):[];
+  var avgScore=h30.length?Math.round(h30.reduce(function(a,b){return a+b.score;},0)/h30.length):getSR();
+  var rank=getHunterRank(avgScore,ST.streak||0,ST.level||1);
+
+  // Animated rank reveal
+  var rw=document.getElementById('oracle-rank-wrap');
+  var rEl=document.getElementById('oracle-rank');
+  var rLbl=document.getElementById('oracle-rank-lbl');
+  var rAvg=document.getElementById('oracle-avg');
+  if(rw)rw.style.display='block';
+  if(rEl){
+    rEl.textContent='?';rEl.style.color='rgba(255,255,255,.2)';
+    // Animate reveal
+    var letters=['E','D','C','B','A','S','SS','SSS',rank.rank];
+    var li=0;
+    var iv=setInterval(function(){
+      if(li<letters.length){
+        rEl.textContent=letters[li];
+        rEl.style.color=li<letters.length-1?'rgba(255,255,255,.3)':rank.col;
+        li++;
+      } else {
+        clearInterval(iv);
+        rEl.style.color=rank.col;
+        rEl.style.textShadow='0 0 40px '+rank.col+', 0 0 80px '+rank.col;
+      }
+    },80);
+  }
+  if(rLbl){rLbl.textContent=rank.lbl;rLbl.style.color=rank.col;}
+  if(rAvg){rAvg.textContent='30-Day Avg: '+avgScore+'% | Level: '+ST.level+' | Streak: '+(ST.streak||0)+' Days';}
+
+  var warnings=[],patterns=[],insights=[],suggestions=[];
+
+  // SYNC analysis
+  if(h30.length>=3){
+    var r3=h30.slice(-3),a3=Math.round(r3.reduce(function(a,b){return a+b.score;},0)/3);
+    if(a3<50) warnings.push({i:'🩸',t:'Critical Sync Drop',d:'Last 3 days average: '+a3+'%. System is deteriorating. Three consecutive sub-50% days is a pattern, not a bad day.'});
+    else if(a3>80) insights.push({i:'🔥',t:'Hot Streak Active',d:'Last 3 days average: '+a3+'%. You are building serious momentum. Do not break this now.'});
+  }
+  if(h30.length>=7){
+    var d7=h30.slice(-7);
+    var zeros=d7.filter(function(h){return h.score===0;}).length;
+    var perfects=d7.filter(function(h){return h.score===100;}).length;
+    if(zeros>=3) warnings.push({i:'💀',t:zeros+' Zero Days This Week',d:'Three or more complete failures in a week is a crisis pattern. The system is watching. Change something tonight.'});
+    if(perfects>=3) insights.push({i:'⚡',t:perfects+' Perfect Days This Week',d:'Sam is operating at peak protocol. '+perfects+'/7 days at 100%. This is what transformation looks like from the inside.'});
+  }
+
+  // Workout
+  var wDone=ST.workoutToday;
+  if(wDone==='done') insights.push({i:'💪',t:'Workout Logged Today',d:'Training session recorded. Consistent training is what turns 58kg into 75kg. Keep the cycle.'});
+  else if(wDone==='missed') warnings.push({i:'💪',t:'Workout Missed Today',d:'No training logged today. Your 58kg to 75kg goal requires consistent progressive overload. The body does not build itself.'});
+  else patterns.push({i:'💪',t:'Workout Not Yet Logged',d:'Go to Iron Forge and log today\'s workout. Even if it\'s rest day — log it.'});
+
+  // Meals
+  var mHit=ST.mealsDone.length;
+  if(mHit===4) insights.push({i:'🍱',t:'All 4 Meals Hit Today',d:'Full nutrition protocol executed. At 58kg, consistent caloric surplus is non-negotiable for your goals.'});
+  else if(mHit<2) warnings.push({i:'🍱',t:'Only '+mHit+'/4 Meals Logged',d:'Skipping meals at 58kg is sabotaging your own goal. Each missed meal is a missed opportunity to grow.'});
+  else patterns.push({i:'🍱',t:mHit+'/4 Meals Done',d:'Close. Log the remaining '+( 4-mHit)+' meal(s) before midnight or face -'+( 4-mHit)*5+' Hp.'});
+
+  // Water
+  if(ST.water>=3) insights.push({i:'💧',t:'Hydration Goal Met',d:ST.water+'L logged. Skin clarity, energy, muscle recovery — all running at full capacity.'});
+  else if(ST.water>0) patterns.push({i:'💧',t:'Water: '+ST.water+'L / 3L',d:'Need '+(3-ST.water).toFixed(1)+'L more before midnight. Dehydration hurts skin, energy, and gains — all three of your goals.'});
+  else warnings.push({i:'💧',t:'No Water Logged',d:'Nothing logged today. Your body is running dry. Go drink water right now before you read anything else.'});
+
+  // Sleep
+  if(ST.sleep>=8) insights.push({i:'😴',t:'Sleep Goal Met',d:ST.sleep+'H logged. Muscle builds during sleep. Skin repairs during sleep. Willpower recharges during sleep.'});
+  else if(ST.sleep>=6) patterns.push({i:'😴',t:'Sleep: '+ST.sleep+'H / 8H',d:'Slightly under target. Even 30 minutes more matters. Get to bed earlier tonight.'});
+  else if(ST.sleep>0) warnings.push({i:'😴',t:'Sleep Deficit: '+ST.sleep+'H',d:'Far below 8H target. Sleep deprivation raises cortisol, kills gains, damages skin, and destroys willpower. The three things you are trying to build.'});
+
+  // Glow
+  var gl=ST.glowChecks.length;
+  if(gl>=8) insights.push({i:'✦',t:'Glow Protocol Strong: '+gl+'/9',d:'Consistent daily skincare compounds into visible results over weeks. Face 4→7 is built in routines like this.'});
+  else if(gl<4) patterns.push({i:'✦',t:'Glow Checklist Low: '+gl+'/9',d:'Only '+gl+' checks done. SPF, face wash, moisturizer — these need daily execution for wheatish skin improvement.'});
+
+  // Purity
+  var pur=ST.purityStreak||0;
+  if(pur===0) warnings.push({i:'🔱',t:'Purity Streak: Zero',d:'Streak is broken. Every relapse drains the exact energy and confidence you need for your goals. Restart now. Day 1 again.'});
+  else if(pur<7) patterns.push({i:'🔱',t:'Building Purity: '+pur+' Days',d:'Next milestone at 7 days: +30 Hp. You should already notice more energy and mental clarity. Don\'t break it.'});
+  else if(pur>=30) insights.push({i:'🔱',t:'Purity Master: '+pur+' Days',d:''+pur+' days clean. This directly feeds confidence, skin quality, gym performance, and social presence. Keep going.'});
+  else insights.push({i:'🔱',t:'Purity Streak: '+pur+' Days',d:'Strong. Next milestone at '+(pur<7?7:pur<15?15:30)+' days. The compound effect is real.'});
+
+  // Capital
+  if(ST.capital<100) patterns.push({i:'💰',t:'Capital Low: ₹'+ST.capital,d:'Low capital means reward claims may fail. Consider logging a deposit.'});
+
+  // Dungeons
+  var expD=ST.dungeons.filter(function(d){return d.expired;}).length;
+  var actD=ST.dungeons.filter(function(d){return !d.claimed&&!d.expired;}).length;
+  if(expD>1) warnings.push({i:'🏯',t:expD+' Dungeons Expired',d:'You set goals but did not execute them. Set fewer dungeons or more realistic timers.'});
+  if(actD>0) suggestions.push({i:'⏱',t:actD+' Active Dungeon'+(actD>1?'s':''),d:'Check the Dungeons tab. Don\'t let them expire.'});
+
+  // Today suggestions
+  var day=dayjs().format('dddd');
+  if(day==='Friday') suggestions.push({i:'🌍',t:'Friday — Travel Prep Mode',d:'Pack your bag tonight. Plan your Sunday adventure. Claim the Travel Reward if you earned it.'});
+  if(day==='Saturday') suggestions.push({i:'🎬',t:'Saturday — Movie Night Available',d:'If your sync rate earned a reward, Movie Night is available tonight only.'});
+  if(day==='Sunday') suggestions.push({i:'🌍',t:'Sunday — Go Out Day',d:'This is your adventure day, Sam. Don\'t waste a Sunday inside.'});
+
+  var curSR=getSR();
+  if(curSR<80) suggestions.push({i:'⚔',t:'Sync Rate: '+curSR+'% — Need 80%+ For Reward',d:'Complete '+(Math.ceil((ST.tasks.length*0.8)-ST.tasks.filter(function(t){return t.done;}).length))+' more task(s) today to hit the 80% reward threshold.'});
+  else suggestions.push({i:'✅',t:'On Track For Reward Tonight',d:'Sync rate at '+curSR+'%. Keep it above 80% until midnight and the system will assign a reward.'});
+
+  // Render all sections
+  var out=document.getElementById('oracle-out');
+  if(!out)return;
+  out.innerHTML=
+    oracleSection('⚠ Warnings — Act Now','var(--red)',warnings)+
+    oracleSection('📊 Patterns','var(--gold)',patterns)+
+    oracleSection('✅ Strengths','var(--green)',insights);
+
+  var tw=document.getElementById('oracle-today-wrap');
+  var td=document.getElementById('oracle-today');
+  if(tw&&td&&suggestions.length){
+    tw.style.display='block';
+    td.innerHTML=suggestions.map(function(s){
+      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(0,229,255,.05);">'+
+        '<span style="font-size:18px;flex-shrink:0;">'+s.i+'</span>'+
+        '<div><div style="font-size:12px;font-weight:900;color:rgba(255,255,255,.85);text-transform:capitalize;margin-bottom:2px;">'+s.t+'</div>'+
+        '<div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.4);line-height:1.5;">'+s.d+'</div></div></div>';
+    }).join('');
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// UTILITY
+// ════════════════════════════════════════════════════════
+function toTC(s){return s.replace(/\w\S*/g,w=>w[0].toUpperCase()+w.slice(1).toLowerCase());}
+
+// ════════════════════════════════════════════════════════
+// DAILY QUOTE
+// ════════════════════════════════════════════════════════
+function loadQuote(){
+  const today=dayjs().format("YYYY-MM-DD");
+  if(ST.qDate!==today){ST.qIdx=(ST.qIdx+1)%QUOTES.length;ST.qDate=today;save();}
+  const q=QUOTES[ST.qIdx];
+  document.getElementById("hdr-quote").textContent=q.t;
+  document.getElementById("grind-qt").textContent=q.t;
+  document.getElementById("grind-qs").textContent=q.s;
+}
+
+
+// ════════════════════════════════════════════════════════
+// PURITY PROTOCOL FUNCTIONS
+// ════════════════════════════════════════════════════════
+const PURITY_MILESTONES=[
+  {days:3,  hp:10},
+  {days:7,  hp:30},
+  {days:15, hp:75},
+  {days:30, hp:150},
+];
+
+function checkPurityMilestones(){
+  // Called daily — check if streak just hit a milestone
+  PURITY_MILESTONES.forEach(m=>{
+    if((ST.purityStreak||0)===m.days){
+      changeHP(m.hp);
+      if(m.hp>=75) trigRew(()=>{});
+      showModal("Purity Milestone 🔱",""+m.days+" Days Clean! +"+m.hp+" Hp Bonus Awarded. Keep Going, Sam.");
+    }
+  });
+}
+
+function reportBreach(){
+  ST.purityStreak=0;
+  ST.purityLastBreach=dayjs().format("YYYY-MM-DD");
+  save();
+  changeHP(-50);
+  trigPen(()=>{});
+  renderKarma();
+  showModal("Breach Logged 💀","Streak Reset To 0. -50 Hp Deducted. Get Back Up, Sam. The System Is Watching.");
+}
+
+// ════════════════════════════════════════════════════════
+// SYSTEM ASSIGN — called at midnight (1 or 2 items)
+// ════════════════════════════════════════════════════════
+function assignSystemItems(type, score){
+  const count = Math.random()>.5 ? 2 : 1; // 1 or 2 items randomly
+
+  if(type==="reward"){
+    const pool = [...FR.filter(r=>r.lock===null), ...ST.customRewards];
+    const shuffled = pool.sort(()=>Math.random()-.5);
+    const items = shuffled.slice(0, Math.min(count, shuffled.length));
+    ST.sysAssigned = {type:"reward", score, items, claimed:[], endured:[], date:dayjs().format("YYYY-MM-DD")};
+  } else {
+    const pool = [...FP, ...ST.customPenalties];
+    const shuffled = pool.sort(()=>Math.random()-.5);
+    const items = shuffled.slice(0, Math.min(count, shuffled.length));
+    ST.sysAssigned = {type:"penalty", score, items, claimed:[], endured:[], date:dayjs().format("YYYY-MM-DD")};
+  }
+  save();
+}
+
+// ════════════════════════════════════════════════════════
+// CLAIM / ENDURE SYSTEM ASSIGNED ITEMS
+// ════════════════════════════════════════════════════════
+async function claimSysReward(idx){
+  if(!ST.sysAssigned||ST.sysAssigned.type!=="reward")return;
+  const r=ST.sysAssigned.items[idx];
+  if(!r)return;
+  if(ST.sysAssigned.claimed.includes(idx)){showModal("Already Claimed","You Already Claimed This Reward.");return;}
+
+  // Capital deduction if needed
+  const cost=r.cost||r.capitalCost||0;
+  if(cost>0){
+    if(ST.capital<cost){showModal("Insufficient Funds","Need ₹"+cost+" In Capital For This Reward.");return;}
+    const res=await showModal("Confirm Claim","₹"+cost+" Will Be Deducted From Capital.",false,"",true);
+    if(!res.ok)return;
+    ST.capital-=cost;
+    addLedger("deduct",cost,r.name+" System Reward");
+    renderCapital();
+  }
+
+  ST.sysAssigned.claimed.push(idx);
+  save();
+  changeHP(r.hp);
+  trigRew(()=>{});
+  renderKarma();
+
+  // Special reward effects
+  if(r.id==="r_screen"){ST.scrTimerEnd=Date.now()+2*60*60*1000;save();startScrTimer();}
+  if(r.id==="r_music"){ST.musicActive=true;save();document.getElementById("music-ban").classList.add("show");}
+}
+
+async function endureSysPenalty(idx){
+  if(!ST.sysAssigned||ST.sysAssigned.type!=="penalty")return;
+  const p=ST.sysAssigned.items[idx];
+  if(!p)return;
+  if(ST.sysAssigned.endured.includes(idx)){showModal("Already Endured","You Already Endured This Penalty.");return;}
+
+  const res=await showModal(p.e+" "+p.name,"You Must Endure This. System Decided. "+Math.abs(p.hp)+" Hp Deducted.",false,"",true);
+  if(!res.ok)return;
+
+  ST.sysAssigned.endured.push(idx);
+  save();
+  changeHP(p.hp); // already negative
+  trigPen(()=>{});
+  if(p.drill&&p.drill.length) showDrill(p);
+  if(p.id==="p_nomobile"){ST.noMobileDay=dayjs().format("YYYY-MM-DD");save();document.getElementById("ban-nomobile").classList.add("show");}
+  if(p.id==="p_nosocial"){ST.noSocialDay=dayjs().format("YYYY-MM-DD");save();document.getElementById("ban-nosocial").classList.add("show");}
+  renderKarma();
+}
+
+// ════════════════════════════════════════════════════════
+// EXPOSE FUNCTIONS TO GLOBAL SCOPE (required for module)
+// ════════════════════════════════════════════════════════
+const _globals = {
+  addTask,delTask,toggleTask,clearDone,
+  logWater,logSleep,
+  workoutDone,workoutMissed,toggleMeal,logWeight,saveMeas,
+  toggleGlow,logPurity,reportBreach,
+  addDung,claimDung,delDung,
+  doDeposit,doDeduct,
+  addCR,addCP,delCR,delCP,
+  claimRew,endurePen,claimSysReward,endureSysPenalty,
+  enableNotifs,exportJSON,importJSON,doPurge,
+  showDailyReport,closeReport,copyReport,
+  runOracle,switchTab,goTab,
+  doneCQ,doneProto,startCQ,startProto,
+  toggleVoice,mAck,mCancel,
+  speak,showModal,R,P
+};
+Object.entries(_globals).forEach(([k,v])=>{if(typeof v==='function') window[k]=v;});
+
+
+function init(){
+  checkMidnight();
+  updateHPUI();updSync();
+  renderTasks();renderIronForge();renderAscend();
+  renderKarma();renderCapital();renderProto();renderDungs();
+  loadQuote();checkBanners();
+  document.getElementById("hdr-date").textContent=dayjs().format("dddd, MMMM D YYYY");
+  document.getElementById("sys-info").textContent="Version: 5.0.0 | Last: "+ST.lastDate+" | Mobile Build";
+  setTimeout(function(){speak("System online. Hunter Sam reporting for duty.");showSummary();},700);
+  checkDebrief();
+  setTimeout(fireNotif,1500);
+}
+</script>
+
+</body>
+</html>
